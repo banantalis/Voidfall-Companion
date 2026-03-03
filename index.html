@@ -74,6 +74,10 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
   <a href="https://mindclashgames.com/wp-content/uploads/2023/09/Voidfall-Official_Errata_Clarifications1.0.pdf" target="_blank">Errata officiel</a>
   <div id="setupInfo" style="margin-top:10px;font-size:.78rem;color:#94a3b8"></div>
   <button onclick="goHome()" style="margin-top:8px;width:100%;padding:7px;background:#1a2236;border:1px solid #f59e0b;border-radius:6px;color:#f59e0b;font-size:.82rem">Ecran d'accueil</button>
+  <div style="display:flex;gap:6px;margin-top:6px">
+    <button onclick="exportSaves()" style="flex:1;padding:7px;background:#1a2236;border:1px solid #22c55e;border-radius:6px;color:#22c55e;font-size:.78rem">Exporter saves</button>
+    <button onclick="importSaves()" style="flex:1;padding:7px;background:#1a2236;border:1px solid #3b82f6;border-radius:6px;color:#3b82f6;font-size:.78rem">Importer saves</button>
+  </div>
   <button onclick="tglM()" style="margin-top:6px;width:100%;padding:7px;background:#1a2236;border:1px solid #2a3454;border-radius:6px;color:#94a3b8;font-size:.82rem">Fermer</button>
 </div>
 <div class="mbg" id="mbg" onclick="clM()"><div class="mdl" id="mdlI" onclick="event.stopPropagation()"></div></div>
@@ -101,6 +105,8 @@ function deleteGame(name){var all=allSaves();delete all[name];putSaves(all);R();
 function loadGame(name){var all=allSaves();S=all[name];if(S){screen="game";document.getElementById("tabBar").style.display="flex";R();}}
 function showAutoSave(){var el=document.getElementById("asv");el.classList.add("show");clearTimeout(asvT);asvT=setTimeout(function(){el.classList.remove("show");},1500);}
 function autoSave(){saveGame();}
+function exportSaves(){var all=allSaves();var json=JSON.stringify(all,null,2);var blob=new Blob([json],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="voidfall_saves_"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(url);}
+function importSaves(){var inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{var data=JSON.parse(ev.target.result);var cur=allSaves();var count=0;for(var k in data){if(data[k]&&data[k].saveName){cur[k]=data[k];count++;}}putSaves(cur);alert(count+" sauvegarde(s) importee(s).");R();}catch(ex){alert("Fichier invalide.");}};r.readAsText(f);};inp.click();}
 
 function newState(name,scenario,house,diff){
   return{saveName:name,scenario:scenario,house:house,diff:diff,tab:"guide",cy:1,rn:1,ph:"focus",si:0,cats:0,prm:0,grd:0,iCo:3,iDe:0,iCu:0,dN:3,dSD:0,cr:null,scB:diff==="Facile"?60:diff==="Moyen"?100:140,scRi:0,scHa:0,scCa:0,scGr:0,scCo:0,scPr:0,scFa:0,scCr:0,scPo:0,pI:0,ts:Date.now()};
