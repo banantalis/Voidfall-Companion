@@ -73,7 +73,7 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
 </head>
 <body>
 <div class="hdr">
-  <button id="burgerBtn" style="background:none;border:none;padding:10px 8px 10px 0;margin:0;line-height:0;outline:none" ontouchend="event.preventDefault();tglM();" onclick="tglM()"><svg width="28" height="20" viewBox="0 0 28 20" fill="none"><line x1="2" y1="2" x2="26" y2="2" stroke="var(--tx)" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="10" x2="26" y2="10" stroke="var(--tx)" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="18" x2="26" y2="18" stroke="var(--tx)" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <button id="burgerBtn" style="background:none;border:none;padding:10px 12px 10px 0;margin:0;line-height:0;outline:none" onclick="tglM()"><svg width="28" height="20" viewBox="0 0 28 20" fill="none"><line x1="2" y1="2" x2="26" y2="2" stroke="var(--tx)" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="10" x2="26" y2="10" stroke="var(--tx)" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="18" x2="26" y2="18" stroke="var(--tx)" stroke-width="1.8" stroke-linecap="round"/></svg></button>
   <div class="title"><h1>VOIDFALL SOLO</h1><small id="hsub"></small></div>
   <div style="display:flex;align-items:center;gap:8px"><div class="autosave" id="asv">auto-save</div><div class="sts" id="hsts"></div></div>
 </div>
@@ -149,7 +149,7 @@ var EV=[
 function gs(){return S.ph==="eval"?EV:ST;}
 function gc(){var s=gs();return s[S.si]||s[0];}
 
-function tglM(){var m=document.getElementById("mnu");var v=m.style.display==="none";m.style.display=v?"block":"none";if(v&&S)document.getElementById("setupInfo").innerHTML="<strong>"+S.saveName+"</strong><br>"+S.house+" | "+S.scenario+" | "+S.diff;}
+function tglM(){var m=document.getElementById("mnu");var v=getComputedStyle(m).display==="none";m.style.display=v?"block":"none";if(v&&S)document.getElementById("setupInfo").innerHTML="<strong>"+S.saveName+"</strong><br>"+S.house+" | "+S.scenario+" | "+S.diff;}
 function clM(){document.getElementById("mbg").style.display="none";}
 function opI(){var s=gc();if(s.m&&MOD[s.m]){document.getElementById("mdlI").innerHTML='<button onclick="clM()" style="float:right;background:none;border:none;color:#a08ec4;font-size:1.4rem;padding:4px">&#10005;</button>'+MOD[s.m];document.getElementById("mbg").style.display="flex";}}
 function stab(t){S.tab=t;document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("on",b.dataset.t===t);});R();}
