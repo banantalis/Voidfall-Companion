@@ -34,8 +34,6 @@ button{font-family:inherit;cursor:pointer}
 .mdl{background:#111827;border:1px solid #f59e0b;border-radius:12px;padding:16px;max-width:420px;max-height:85vh;overflow-y:auto;width:100%}
 .mnu{background:#111827;border-bottom:1px solid #2a3454;padding:14px;position:fixed;top:0;left:0;right:0;z-index:99;max-width:480px;margin:0 auto;display:none;padding-top:max(14px,env(safe-area-inset-top))}
 .mnu a{display:block;padding:7px 0;color:#3b82f6;font-size:.84rem;text-decoration:none}
-.svb{display:flex;gap:6px;margin-bottom:8px}
-.sv{flex:1;padding:8px;border-radius:6px;border:1px solid #2a3454;background:#1a2236;font-size:.78rem;font-weight:600}
 .pz{background:#1a2236;border:1px solid #2a3454;border-radius:10px;padding:14px;margin-bottom:12px}
 .pb{width:100%;padding:12px;border-radius:8px;border:2px dashed #2a3454;background:transparent;color:#f59e0b;font-size:.88rem;font-weight:600}
 .pi{width:100%;border-radius:8px;max-height:200px;object-fit:contain;background:#000;margin-top:8px}
@@ -43,39 +41,42 @@ button{font-family:inherit;cursor:pointer}
 .db{flex:1;padding:7px;border-radius:6px;border:1px solid #2a3454;background:#1a2236;color:#e2e8f0;font-size:.76rem;font-weight:600}
 .db.on{background:#f59e0b;color:#000}
 .ibtn{background:none;border:1px solid #f59e0b;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:8px;color:#f59e0b;font-size:.88rem;font-weight:700}
-/* Setup screen */
-.setup{padding:20px 14px;display:flex;flex-direction:column;gap:14px;flex:1;overflow-y:auto}
-.setup h2{color:#f59e0b;font-size:1.1rem;text-align:center;margin-bottom:4px}
-.setup label{font-size:.82rem;color:#94a3b8;display:block;margin-bottom:4px}
-.setup input,.setup select{width:100%;padding:10px;border-radius:8px;border:1px solid #2a3454;background:#1a2236;color:#e2e8f0;font-size:.88rem;font-family:inherit}
-.setup select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
-.start-btn{padding:14px;border-radius:10px;border:none;background:#f59e0b;color:#000;font-size:1rem;font-weight:700;margin-top:8px}
-/* SVG diagrams in modals */
+label{font-size:.82rem;color:#94a3b8;display:block;margin-bottom:4px}
+input,select{width:100%;padding:10px;border-radius:8px;border:1px solid #2a3454;background:#1a2236;color:#e2e8f0;font-size:.88rem;font-family:inherit}
+select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.big-btn{width:100%;padding:14px;border-radius:10px;border:none;font-size:1rem;font-weight:700;margin-bottom:10px}
+.save-card{background:#111827;border:1px solid #2a3454;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.save-card .info{flex:1}
+.save-card .name{font-size:.9rem;font-weight:700;color:#f59e0b}
+.save-card .detail{font-size:.72rem;color:#94a3b8;margin-top:2px}
+.save-card .acts{display:flex;gap:6px}
+.save-card .acts button{padding:8px 12px;border-radius:6px;font-size:.76rem;font-weight:600;border:none}
+.del-btn{background:#331111;color:#ef4444}
+.load-btn{background:#f59e0b;color:#000}
+.autosave{font-size:.68rem;color:#22c55e;text-align:right;opacity:0;transition:opacity .3s}
+.autosave.show{opacity:1}
 .diagram{margin:12px 0;text-align:center}
-.diagram svg{max-width:100%;height:auto}
-.tip{font-size:.78rem;color:#94a3b8;margin-top:8px;line-height:1.5;font-style:italic}
-.modal-title{font-size:.9rem;font-weight:700;color:#f59e0b;margin-bottom:10px}
-.modal-sub{font-size:.82rem;color:#e2e8f0;line-height:1.6;margin-bottom:8px}
 .photo-target{background:#1a2236;border:1px dashed #f59e0b;border-radius:8px;padding:10px;margin:8px 0;font-size:.82rem;color:#f59e0b;text-align:center}
+.modal-title{font-size:.9rem;font-weight:700;color:#f59e0b;margin-bottom:10px}
+.tip{font-size:.78rem;color:#94a3b8;margin-top:8px;line-height:1.5;font-style:italic}
 </style>
 </head>
 <body>
 <div class="hdr">
   <button style="background:none;border:none;color:#e2e8f0;font-size:1.3rem;margin-right:10px" onclick="tglM()">&#9776;</button>
   <div class="title"><h1>VOIDFALL SOLO</h1><small id="hsub"></small></div>
-  <div class="sts" id="hsts"></div>
+  <div style="display:flex;align-items:center;gap:8px"><div class="autosave" id="asv">auto-save</div><div class="sts" id="hsts"></div></div>
 </div>
 <div class="mnu" id="mnu">
   <div style="font-weight:700;color:#f59e0b;margin-bottom:8px;font-size:.9rem">Documents</div>
   <a href="https://www.supermeeple.com/wp-content/uploads/2015/02/FR_VOIDFALL-Rules.pdf" target="_blank">Regles FR</a>
   <a href="https://www.supermeeple.com/wp-content/uploads/2015/02/FR_VOIDFALL-Compendium.pdf" target="_blank">Compendium FR</a>
   <a href="https://mindclashgames.com/wp-content/uploads/2023/09/Voidfall-Official_Errata_Clarifications1.0.pdf" target="_blank">Errata officiel</a>
-  <div style="display:flex;gap:6px;margin-top:12px" id="cyR"></div>
-  <div id="setupInfo" style="margin-top:8px;font-size:.78rem;color:#94a3b8"></div>
-  <button onclick="showSetup()" style="margin-top:8px;width:100%;padding:7px;background:#1a2236;border:1px solid #f59e0b;border-radius:6px;color:#f59e0b;font-size:.82rem">Changer scenario</button>
+  <div id="setupInfo" style="margin-top:10px;font-size:.78rem;color:#94a3b8"></div>
+  <button onclick="goHome()" style="margin-top:8px;width:100%;padding:7px;background:#1a2236;border:1px solid #f59e0b;border-radius:6px;color:#f59e0b;font-size:.82rem">Ecran d'accueil</button>
   <button onclick="tglM()" style="margin-top:6px;width:100%;padding:7px;background:#1a2236;border:1px solid #2a3454;border-radius:6px;color:#94a3b8;font-size:.82rem">Fermer</button>
 </div>
-<div class="mbg" id="mbg" onclick="clM()"><div class="mdl" id="mdlInner" onclick="event.stopPropagation()"></div></div>
+<div class="mbg" id="mbg" onclick="clM()"><div class="mdl" id="mdlI" onclick="event.stopPropagation()"></div></div>
 <div class="ct" id="ct"></div>
 <div class="tabs" id="tabBar" style="display:none">
   <button class="tab on" data-t="guide" onclick="stab('guide')">Guide</button>
@@ -85,46 +86,48 @@ button{font-family:inherit;cursor:pointer}
 </div>
 <script>
 var HOUSES=["Cortozaar","Dunlork","Novarchon","Belitan","Kh'Zeen","Velthari","Dominor","Fenrari"];
-var S={setup:true,scenario:"",house:"Cortozaar",diff:"Facile",tab:"guide",cy:1,rn:1,ph:"focus",si:0,cats:0,prm:0,grd:0,iCo:3,iDe:0,iCu:0,dN:3,dSD:0,cr:null,scB:60,scRi:0,scHa:0,scCa:0,scGr:0,scCo:0,scPr:0,scFa:0,scCr:0,scPo:0,pI:0};
+var SCENARIOS=["Tutorial Solo","Scenario Solo 1","Scenario Solo 2","Scenario Solo 3","Scenario Solo 4","Scenario Solo 5","Scenario Solo 6","Scenario Solo 7","Scenario Solo 8"];
+var DIFF=["Facile","Moyen","Difficile"];
+var screen="home"; // home, newgame, game
+var S=null; // current game state
 var curPic=null;
+var asvT=null;
 
-// SVG DIAGRAMS for info modals
-var DIAG={
-alert:'<svg viewBox="0 0 280 120" width="280"><rect x="5" y="5" width="120" height="110" rx="6" fill="#1a1a2e" stroke="#f59e0b" stroke-width="2"/><text x="65" y="28" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700">ALERTE</text><text x="65" y="50" text-anchor="middle" fill="#e2e8f0" font-size="9">SITUATION II</text><text x="65" y="68" text-anchor="middle" fill="#94a3b8" font-size="8">ou GUERRE</text><rect x="25" y="76" width="80" height="24" rx="3" fill="#2a3454"/><text x="65" y="92" text-anchor="middle" fill="#94a3b8" font-size="8">icones modificateurs</text><text x="150" y="15" fill="#94a3b8" font-size="9">+</text><rect x="155" y="5" width="120" height="110" rx="6" fill="#1a1a2e" stroke="#ef4444" stroke-width="2"/><text x="215" y="28" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="700">CRISE Niv.II</text><rect x="170" y="38" width="90" height="18" rx="3" fill="#2a3454"/><text x="215" y="51" text-anchor="middle" fill="#f97316" font-size="8">rangee militaire</text><rect x="170" y="62" width="90" height="18" rx="3" fill="#2a3454"/><text x="215" y="75" text-anchor="middle" fill="#3b82f6" font-size="8">rangee economique</text><rect x="170" y="86" width="90" height="20" rx="3" fill="#331111"/><text x="215" y="100" text-anchor="middle" fill="#ef4444" font-size="8">penalite</text></svg>',
+// SAVE SYSTEM
+function allSaves(){try{var d=localStorage.getItem("vf_saves");return d?JSON.parse(d):{};}catch(e){return {};}}
+function putSaves(o){try{localStorage.setItem("vf_saves",JSON.stringify(o));}catch(e){}}
+function saveGame(){if(!S||!S.saveName)return;var all=allSaves();all[S.saveName]=JSON.parse(JSON.stringify(S));putSaves(all);showAutoSave();}
+function deleteGame(name){var all=allSaves();delete all[name];putSaves(all);R();}
+function loadGame(name){var all=allSaves();S=all[name];if(S){screen="game";document.getElementById("tabBar").style.display="flex";R();}}
+function showAutoSave(){var el=document.getElementById("asv");el.classList.add("show");clearTimeout(asvT);asvT=setTimeout(function(){el.classList.remove("show");},1500);}
+function autoSave(){saveGame();}
 
-crisis:'<svg viewBox="0 0 280 100" width="280"><rect x="5" y="5" width="270" height="90" rx="6" fill="#1a1a2e" stroke="#f97316" stroke-width="2"/><text x="140" y="22" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700">PLATEAU CRISE</text><rect x="15" y="30" width="50" height="24" rx="3" fill="#2a3454" stroke="#f97316" stroke-dasharray="3"/><rect x="70" y="30" width="50" height="24" rx="3" fill="#2a3454" stroke="#f97316" stroke-dasharray="3"/><rect x="125" y="30" width="50" height="24" rx="3" fill="#2a3454" stroke="#f97316" stroke-dasharray="3"/><rect x="180" y="30" width="50" height="24" rx="3" fill="#331111"/><rect x="235" y="30" width="30" height="24" rx="3" fill="#440000" stroke="#ef4444"/><text x="90" y="46" text-anchor="middle" fill="#f97316" font-size="7">rangee MILITAIRE &rarr;</text><text x="250" y="46" text-anchor="middle" fill="#ef4444" font-size="6">CATA</text><rect x="15" y="62" width="50" height="24" rx="3" fill="#2a3454" stroke="#3b82f6" stroke-dasharray="3"/><rect x="70" y="62" width="50" height="24" rx="3" fill="#2a3454" stroke="#3b82f6" stroke-dasharray="3"/><rect x="125" y="62" width="50" height="24" rx="3" fill="#2a3454" stroke="#3b82f6" stroke-dasharray="3"/><rect x="180" y="62" width="50" height="24" rx="3" fill="#111133"/><text x="90" y="78" text-anchor="middle" fill="#3b82f6" font-size="7">rangee ECONOMIQUE &rarr;</text></svg>',
+function newState(name,scenario,house,diff){
+  return{saveName:name,scenario:scenario,house:house,diff:diff,tab:"guide",cy:1,rn:1,ph:"focus",si:0,cats:0,prm:0,grd:0,iCo:3,iDe:0,iCu:0,dN:3,dSD:0,cr:null,scB:diff==="Facile"?60:diff==="Moyen"?100:140,scRi:0,scHa:0,scCa:0,scGr:0,scCo:0,scPr:0,scFa:0,scCr:0,scPo:0,pI:0,ts:Date.now()};
+}
 
-focus:'<svg viewBox="0 0 200 130" width="200"><rect x="5" y="5" width="190" height="120" rx="8" fill="#1a1a2e" stroke="#22c55e" stroke-width="2"/><text x="100" y="25" text-anchor="middle" fill="#22c55e" font-size="12" font-weight="700">FOCUS</text><text x="100" y="40" text-anchor="middle" fill="#94a3b8" font-size="9">(ex: Production, Conquete...)</text><rect x="15" y="50" width="170" height="20" rx="3" fill="#2a3454"/><text x="100" y="64" text-anchor="middle" fill="#e2e8f0" font-size="8">Action 1</text><rect x="15" y="74" width="170" height="20" rx="3" fill="#2a3454"/><text x="100" y="88" text-anchor="middle" fill="#e2e8f0" font-size="8">Action 2</text><rect x="15" y="98" width="170" height="20" rx="3" fill="#2a3454"/><text x="100" y="112" text-anchor="middle" fill="#e2e8f0" font-size="8">Action 3 (jeton Commerce)</text></svg>',
-
-board:'<svg viewBox="0 0 280 120" width="280"><rect x="5" y="5" width="270" height="110" rx="6" fill="#1a1a2e" stroke="#94a3b8" stroke-width="1"/><text x="140" y="22" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="700">VUE D\'ENSEMBLE</text><rect x="15" y="30" width="60" height="35" rx="3" fill="#2a3454"/><text x="45" y="50" text-anchor="middle" fill="#22c55e" font-size="7">Vos secteurs</text><rect x="85" y="30" width="50" height="35" rx="3" fill="#2a3454"/><text x="110" y="50" text-anchor="middle" fill="#f97316" font-size="7">Flottes</text><rect x="145" y="30" width="55" height="35" rx="3" fill="#2a3454"/><text x="172" y="50" text-anchor="middle" fill="#3b82f6" font-size="7">Ressources</text><rect x="210" y="30" width="55" height="35" rx="3" fill="#2a3454"/><text x="237" y="50" text-anchor="middle" fill="#a855f7" font-size="7">Pistes Civ</text><rect x="15" y="75" width="120" height="30" rx="3" fill="#2a3454"/><text x="75" y="94" text-anchor="middle" fill="#94a3b8" font-size="7">Fiche Maison + Programmes</text><rect x="145" y="75" width="120" height="30" rx="3" fill="#2a3454"/><text x="205" y="94" text-anchor="middle" fill="#94a3b8" font-size="7">Technologies</text></svg>',
-
-event:'<svg viewBox="0 0 240 100" width="240"><rect x="5" y="5" width="230" height="90" rx="6" fill="#1a1a2e" stroke="#a855f7" stroke-width="2"/><text x="120" y="22" text-anchor="middle" fill="#a855f7" font-size="11" font-weight="700">EVENEMENT GALACTIQUE</text><rect x="15" y="32" width="100" height="25" rx="3" fill="#2a3454"/><text x="65" y="48" text-anchor="middle" fill="#94a3b8" font-size="8">partie gauche: nb manches</text><rect x="125" y="32" width="100" height="50" rx="3" fill="#2a3454" stroke="#22c55e" stroke-width="1"/><text x="175" y="50" text-anchor="middle" fill="#22c55e" font-size="8">OBJECTIFS</text><text x="175" y="64" text-anchor="middle" fill="#ef4444" font-size="7">rouge = 1 seul</text><text x="175" y="76" text-anchor="middle" fill="#22c55e" font-size="7">vert = les deux</text></svg>',
-
-house:'<svg viewBox="0 0 260 110" width="260"><rect x="5" y="5" width="250" height="100" rx="6" fill="#1a1a2e" stroke="#94a3b8" stroke-width="1"/><text x="130" y="22" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="700">FICHE MAISON</text><rect x="15" y="30" width="55" height="30" rx="3" fill="#2a3454"/><text x="42" y="48" text-anchor="middle" fill="#94a3b8" font-size="7">Techno</text><rect x="80" y="30" width="55" height="30" rx="3" fill="#2a3454"/><text x="107" y="48" text-anchor="middle" fill="#94a3b8" font-size="7">Pistes</text><rect x="15" y="68" width="55" height="30" rx="3" fill="#2a3454" stroke="#22c55e" stroke-dasharray="3"/><text x="42" y="86" text-anchor="middle" fill="#22c55e" font-size="7">Prog 1</text><rect x="80" y="68" width="55" height="30" rx="3" fill="#2a3454" stroke="#22c55e" stroke-dasharray="3"/><text x="107" y="86" text-anchor="middle" fill="#22c55e" font-size="7">Prog 2</text><rect x="145" y="68" width="55" height="30" rx="3" fill="#331111" stroke="#ef4444" stroke-dasharray="3"/><text x="172" y="86" text-anchor="middle" fill="#ef4444" font-size="7">Corruption?</text><circle cx="210" cy="50" r="15" fill="#2a3454" stroke="#f59e0b"/><text x="210" y="54" text-anchor="middle" fill="#f59e0b" font-size="7">Influence</text></svg>',
-
-resources:'<svg viewBox="0 0 240 60" width="240"><rect x="5" y="5" width="50" height="50" rx="6" fill="#22c55e" opacity=".2" stroke="#22c55e"/><text x="30" y="35" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="700">Nourr</text><rect x="65" y="5" width="50" height="50" rx="6" fill="#94a3b8" opacity=".2" stroke="#94a3b8"/><text x="90" y="35" text-anchor="middle" fill="#94a3b8" font-size="8" font-weight="700">Mat</text><rect x="125" y="5" width="50" height="50" rx="6" fill="#f59e0b" opacity=".2" stroke="#f59e0b"/><text x="150" y="35" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="700">Energ</text><rect x="185" y="5" width="50" height="50" rx="6" fill="#3b82f6" opacity=".2" stroke="#3b82f6"/><text x="210" y="35" text-anchor="middle" fill="#3b82f6" font-size="8" font-weight="700">Credit</text></svg>'
+// SVG DIAGRAMS
+var DG={
+alert:'<svg viewBox="0 0 280 120" width="280"><rect x="5" y="5" width="120" height="110" rx="6" fill="#1a1a2e" stroke="#f59e0b" stroke-width="2"/><text x="65" y="28" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700">ALERTE</text><text x="65" y="50" text-anchor="middle" fill="#e2e8f0" font-size="9">SITUATION II</text><text x="65" y="68" text-anchor="middle" fill="#94a3b8" font-size="8">ou GUERRE</text><rect x="25" y="76" width="80" height="24" rx="3" fill="#2a3454"/><text x="65" y="92" text-anchor="middle" fill="#94a3b8" font-size="8">modificateurs</text><text x="140" y="60" fill="#94a3b8" font-size="16">+</text><rect x="155" y="5" width="120" height="110" rx="6" fill="#1a1a2e" stroke="#ef4444" stroke-width="2"/><text x="215" y="28" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="700">CRISE Niv.II</text><rect x="170" y="40" width="90" height="18" rx="3" fill="#2a3454"/><text x="215" y="53" text-anchor="middle" fill="#f97316" font-size="8">militaire</text><rect x="170" y="64" width="90" height="18" rx="3" fill="#2a3454"/><text x="215" y="77" text-anchor="middle" fill="#3b82f6" font-size="8">economique</text><rect x="170" y="88" width="90" height="20" rx="3" fill="#331111"/><text x="215" y="102" text-anchor="middle" fill="#ef4444" font-size="8">penalite</text></svg>',
+crisis:'<svg viewBox="0 0 280 100" width="280"><rect x="5" y="5" width="270" height="90" rx="6" fill="#1a1a2e" stroke="#f97316" stroke-width="2"/><text x="140" y="22" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700">PLATEAU CRISE</text><rect x="15" y="30" width="50" height="24" rx="3" fill="#2a3454" stroke="#f97316" stroke-dasharray="3"/><rect x="70" y="30" width="50" height="24" rx="3" fill="#2a3454"/><rect x="125" y="30" width="50" height="24" rx="3" fill="#2a3454"/><rect x="180" y="30" width="50" height="24" rx="3" fill="#331111"/><rect x="235" y="30" width="30" height="24" rx="3" fill="#440000" stroke="#ef4444"/><text x="100" y="46" text-anchor="middle" fill="#f97316" font-size="7">MILITAIRE &rarr;</text><text x="250" y="46" text-anchor="middle" fill="#ef4444" font-size="6">CATA</text><rect x="15" y="62" width="50" height="24" rx="3" fill="#2a3454" stroke="#3b82f6" stroke-dasharray="3"/><rect x="70" y="62" width="50" height="24" rx="3" fill="#2a3454"/><rect x="125" y="62" width="50" height="24" rx="3" fill="#2a3454"/><rect x="180" y="62" width="50" height="24" rx="3" fill="#111133"/><text x="100" y="78" text-anchor="middle" fill="#3b82f6" font-size="7">ECONOMIQUE &rarr;</text></svg>',
+focus:'<svg viewBox="0 0 200 130" width="200"><rect x="5" y="5" width="190" height="120" rx="8" fill="#1a1a2e" stroke="#22c55e" stroke-width="2"/><text x="100" y="25" text-anchor="middle" fill="#22c55e" font-size="12" font-weight="700">FOCUS</text><rect x="15" y="50" width="170" height="18" rx="3" fill="#2a3454"/><text x="100" y="63" text-anchor="middle" fill="#e2e8f0" font-size="8">Action 1</text><rect x="15" y="74" width="170" height="18" rx="3" fill="#2a3454"/><text x="100" y="87" text-anchor="middle" fill="#e2e8f0" font-size="8">Action 2</text><rect x="15" y="98" width="170" height="18" rx="3" fill="#2a3454"/><text x="100" y="111" text-anchor="middle" fill="#94a3b8" font-size="8">Action 3 (Commerce)</text></svg>',
+board:'<svg viewBox="0 0 280 100" width="280"><rect x="5" y="5" width="270" height="90" rx="6" fill="#1a1a2e" stroke="#94a3b8"/><text x="140" y="22" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="700">VUE D\'ENSEMBLE</text><rect x="15" y="30" width="60" height="28" rx="3" fill="#2a3454"/><text x="45" y="48" text-anchor="middle" fill="#22c55e" font-size="7">Secteurs</text><rect x="85" y="30" width="50" height="28" rx="3" fill="#2a3454"/><text x="110" y="48" text-anchor="middle" fill="#f97316" font-size="7">Flottes</text><rect x="145" y="30" width="55" height="28" rx="3" fill="#2a3454"/><text x="172" y="48" text-anchor="middle" fill="#3b82f6" font-size="7">Ressources</text><rect x="210" y="30" width="55" height="28" rx="3" fill="#2a3454"/><text x="237" y="48" text-anchor="middle" fill="#a855f7" font-size="7">Pistes</text><rect x="15" y="66" width="120" height="24" rx="3" fill="#2a3454"/><text x="75" y="82" text-anchor="middle" fill="#94a3b8" font-size="7">Maison + Programmes</text><rect x="145" y="66" width="120" height="24" rx="3" fill="#2a3454"/><text x="205" y="82" text-anchor="middle" fill="#94a3b8" font-size="7">Technologies</text></svg>',
+event:'<svg viewBox="0 0 240 90" width="240"><rect x="5" y="5" width="230" height="80" rx="6" fill="#1a1a2e" stroke="#a855f7" stroke-width="2"/><text x="120" y="22" text-anchor="middle" fill="#a855f7" font-size="11" font-weight="700">EVENEMENT GALACTIQUE</text><rect x="15" y="32" width="100" height="20" rx="3" fill="#2a3454"/><text x="65" y="46" text-anchor="middle" fill="#94a3b8" font-size="8">nb manches</text><rect x="125" y="32" width="100" height="44" rx="3" fill="#2a3454" stroke="#22c55e"/><text x="175" y="50" text-anchor="middle" fill="#22c55e" font-size="8">OBJECTIFS</text><text x="175" y="64" text-anchor="middle" fill="#ef4444" font-size="7">rouge = 1 seul</text><text x="175" y="74" text-anchor="middle" fill="#22c55e" font-size="7">vert = les deux</text></svg>',
+house:'<svg viewBox="0 0 260 100" width="260"><rect x="5" y="5" width="250" height="90" rx="6" fill="#1a1a2e" stroke="#94a3b8"/><text x="130" y="22" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="700">FICHE MAISON</text><rect x="15" y="30" width="55" height="26" rx="3" fill="#2a3454"/><text x="42" y="47" text-anchor="middle" fill="#94a3b8" font-size="7">Techno</text><rect x="15" y="62" width="55" height="26" rx="3" fill="#2a3454" stroke="#22c55e" stroke-dasharray="3"/><text x="42" y="79" text-anchor="middle" fill="#22c55e" font-size="7">Prog 1</text><rect x="80" y="62" width="55" height="26" rx="3" fill="#2a3454" stroke="#22c55e" stroke-dasharray="3"/><text x="107" y="79" text-anchor="middle" fill="#22c55e" font-size="7">Prog 2</text><rect x="145" y="62" width="55" height="26" rx="3" fill="#331111" stroke="#ef4444" stroke-dasharray="3"/><text x="172" y="79" text-anchor="middle" fill="#ef4444" font-size="7">Corruption?</text></svg>',
+res:'<svg viewBox="0 0 240 50" width="240"><rect x="5" y="5" width="50" height="40" rx="6" fill="#22c55e" opacity=".2" stroke="#22c55e"/><text x="30" y="30" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="700">Nourr</text><rect x="65" y="5" width="50" height="40" rx="6" fill="#94a3b8" opacity=".2" stroke="#94a3b8"/><text x="90" y="30" text-anchor="middle" fill="#94a3b8" font-size="8" font-weight="700">Mat</text><rect x="125" y="5" width="50" height="40" rx="6" fill="#f59e0b" opacity=".2" stroke="#f59e0b"/><text x="150" y="30" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="700">Energ</text><rect x="185" y="5" width="50" height="40" rx="6" fill="#3b82f6" opacity=".2" stroke="#3b82f6"/><text x="210" y="30" text-anchor="middle" fill="#3b82f6" font-size="8" font-weight="700">Credit</text></svg>'
 };
-
-// MODAL CONTENT with SVGs
-var MODALS={
-alert:'<div class="modal-title">Carte Alerte + Carte Crise</div><div class="diagram">'+DIAG.alert+'</div><div class="photo-target">Photographiez les 2 cartes ensemble</div><div class="tip">L\'Alerte (SITUATION ou GUERRE) est sur la pioche. Si Situation, piochez aussi la Crise du niveau correspondant.</div>',
-
-focus:'<div class="modal-title">Carte Focus choisie</div><div class="diagram">'+DIAG.focus+'</div><div class="photo-target">Photographiez la carte Focus + Programme si joue</div><div class="tip">Vous choisirez 2 des 3 actions. Si vous jouez un Programme, il doit correspondre au Focus.</div>',
-
-overview:'<div class="modal-title">Vue d\'ensemble du plateau</div><div class="diagram">'+DIAG.board+'</div><div class="photo-target">Photographiez large : secteurs, flottes, ressources, pistes</div><div class="tip">Plus la photo est lisible, meilleur sera le conseil. Incluez vos Technologies et Programmes visibles.</div>',
-
-crisisboard:'<div class="modal-title">Plateau Crise complet</div><div class="diagram">'+DIAG.crisis+'</div><div class="photo-target">Photographiez le plateau entier avec toutes les cartes dessus</div><div class="tip">Les cartes glissent de gauche a droite. Si une depasse le dernier slot = Catastrophe. Haut = militaire (Escarmouche). Bas = economique (ressources).</div>',
-
-counterattack:'<div class="modal-title">Plateau Crise + Ressources</div><div class="diagram">'+DIAG.crisis+'</div><div class="diagram">'+DIAG.resources+'</div><div class="photo-target">Photographiez plateau Crise + vos ressources visibles</div><div class="tip">L\'Escarmouche utilise la rangee militaire. Le cout eco utilise la rangee economique. -3 Inf par ressource manquante.</div>',
-
-galactic:'<div class="modal-title">Evenement Galactique</div><div class="diagram">'+DIAG.event+'</div><div class="photo-target">Photographiez la carte entiere</div><div class="tip">Partie droite = objectifs de scoring. Ligne rouge = un seul objectif. Ligne verte = les deux.</div>',
-
-programs:'<div class="modal-title">Fiche Maison + Programmes</div><div class="diagram">'+DIAG.house+'</div><div class="photo-target">Photographiez la fiche avec tous les Programmes visibles</div><div class="tip">Seuls les Programmes Purs (sans Corruption) scorent. Verifiez aussi les jetons Commerce dessus.</div>'
+var MOD={
+alert:'<div class="modal-title">Carte Alerte + Carte Crise</div><div class="diagram">'+DG.alert+'</div><div class="photo-target">Photographiez les 2 cartes ensemble</div><div class="tip">Alerte = SITUATION ou GUERRE. Si Situation, piochez aussi la Crise correspondante.</div>',
+focus:'<div class="modal-title">Carte Focus choisie</div><div class="diagram">'+DG.focus+'</div><div class="photo-target">Photographiez Focus + Programme si joue</div><div class="tip">Vous choisirez 2 des 3 actions.</div>',
+overview:'<div class="modal-title">Vue d\'ensemble</div><div class="diagram">'+DG.board+'</div><div class="photo-target">Photo large : secteurs, flottes, ressources, pistes</div>',
+crisisboard:'<div class="modal-title">Plateau Crise</div><div class="diagram">'+DG.crisis+'</div><div class="photo-target">Photographiez le plateau entier</div><div class="tip">Cartes glissent gauche a droite. Depasse = Catastrophe.</div>',
+counterattack:'<div class="modal-title">Plateau Crise + Ressources</div><div class="diagram">'+DG.crisis+'</div><div class="diagram">'+DG.res+'</div><div class="photo-target">Plateau Crise + ressources visibles</div>',
+galactic:'<div class="modal-title">Evenement Galactique</div><div class="diagram">'+DG.event+'</div><div class="photo-target">Photographiez la carte entiere</div>',
+programs:'<div class="modal-title">Fiche Maison + Programmes</div><div class="diagram">'+DG.house+'</div><div class="photo-target">Photographiez avec Programmes visibles</div><div class="tip">Seuls les Purs (sans Corruption) scorent.</div>'
 };
-
 var ST=[
-{t:"0. Reveler Crise",d:"Situation : piochez Crise du niveau.\nGuerre : ignorez cette etape.",p:1,m:"alert"},
-{t:"1. Selection",d:"Choisissez un Focus. Option : Commerce, Programme.",p:1,m:"focus"},
+{t:"0. Reveler Crise",d:"Situation : piochez Crise du niveau.\nGuerre : ignorez.",p:1,m:"alert"},
+{t:"1. Selection",d:"Choisissez Focus. Option : Commerce, Programme.",p:1,m:"focus"},
 {t:"2. Actions",d:"2 des 3 actions Focus (+ Programme).\nResolvez Crises si possible.",p:1,m:"overview"},
 {t:"3. Nettoyage",d:"Max 2 Flotte/secteur. Max 4 Gloire.\nPlacer Programme sur fiche Maison.",p:0,m:""},
 {t:"4. Progression Neant",d:"Guerre : plateau Crise OU Catastrophe.\nSituation : Crises glissent a droite.",p:1,m:"crisisboard"}
@@ -133,26 +136,23 @@ var EV=[
 {t:"1. Contre-Attaque",d:"Escarmouche + cout eco.\n-3 Inf/ressource manquante.",p:1,m:"counterattack"},
 {t:"2. Entretien",d:"1 Nourr OU 2 Mat/Ener par unite.\n-3 Inf par manque.",p:0,m:""},
 {t:"3. Obj Galactiques",d:"Droite Evenement. Rouge=1. Vert=2.",p:1,m:"galactic"},
-{t:"4. Obj Programme",d:"Scorez Programmes Purs (sans Corruption).",p:1,m:"programs"},
-{t:"5. Recuperer Focus",d:"Reprenez tous vos Focus.\nCycle 1 : aussi Innovation.",p:0,m:""}
+{t:"4. Obj Programme",d:"Scorez Programmes Purs.",p:1,m:"programs"},
+{t:"5. Recuperer Focus",d:"Reprenez Focus. Cycle 1 : aussi Innovation.",p:0,m:""}
 ];
-
 function gs(){return S.ph==="eval"?EV:ST;}
 function gc(){var s=gs();return s[S.si]||s[0];}
 
-function sv(){try{localStorage.setItem("vf3",JSON.stringify(S));smsg("Sauvegarde OK");}catch(e){smsg("Erreur");}}
-function rs(){if(confirm("Reset partie ?")){localStorage.removeItem("vf3");location.reload();}}
-var smt;function smsg(t){var e=document.getElementById("sm");if(e){e.textContent=t;e.style.display="block";clearTimeout(smt);smt=setTimeout(function(){e.style.display="none";},2000);}}
-
-function tglM(){var m=document.getElementById("mnu");m.style.display=m.style.display==="none"?"block":"none";document.getElementById("setupInfo").innerHTML="<strong>"+S.house+"</strong> | "+S.scenario+" | "+S.diff;}
+function tglM(){var m=document.getElementById("mnu");var v=m.style.display==="none";m.style.display=v?"block":"none";if(v&&S)document.getElementById("setupInfo").innerHTML="<strong>"+S.saveName+"</strong><br>"+S.house+" | "+S.scenario+" | "+S.diff;}
 function clM(){document.getElementById("mbg").style.display="none";}
-function opI(){var s=gc();if(s.m&&MODALS[s.m]){document.getElementById("mdlInner").innerHTML='<button onclick="clM()" style="float:right;background:none;border:none;color:#94a3b8;font-size:1.4rem;padding:4px">&#10005;</button>'+MODALS[s.m];document.getElementById("mbg").style.display="flex";}}
+function opI(){var s=gc();if(s.m&&MOD[s.m]){document.getElementById("mdlI").innerHTML='<button onclick="clM()" style="float:right;background:none;border:none;color:#94a3b8;font-size:1.4rem;padding:4px">&#10005;</button>'+MOD[s.m];document.getElementById("mbg").style.display="flex";}}
 function stab(t){S.tab=t;document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("on",b.dataset.t===t);});R();}
-function nx(){curPic=null;S.si++;var s=gs();if(S.si>=s.length){if(S.ph==="focus"){S.ph="eval";S.si=0;}else{if(S.cy<3)S.cy++;S.rn=1;S.ph="focus";S.si=0;}}R();}
-function pv(){if(S.si>0){S.si--;curPic=null;R();}}
-function nR(){S.rn++;S.ph="focus";S.si=0;curPic=null;R();}
-function ci(k){S[k]++;R();}
-function cd(k){if(S[k]>0)S[k]--;R();}
+function goHome(){screen="home";S=null;document.getElementById("tabBar").style.display="none";document.getElementById("mnu").style.display="none";R();}
+
+function nx(){curPic=null;S.si++;var s=gs();if(S.si>=s.length){if(S.ph==="focus"){S.ph="eval";S.si=0;}else{if(S.cy<3)S.cy++;S.rn=1;S.ph="focus";S.si=0;}}autoSave();R();}
+function pv(){if(S.si>0){S.si--;curPic=null;autoSave();R();}}
+function nR(){S.rn++;S.ph="focus";S.si=0;curPic=null;autoSave();R();}
+function ci(k){S[k]++;autoSave();R();}
+function cd(k){if(S[k]>0)S[k]--;autoSave();R();}
 function ct(id,lb,v){return '<div class="ctr"><span>'+lb+'</span><div style="display:flex;align-items:center;gap:5px"><button class="cb" onclick="cd(\''+id+'\')">-</button><span class="cv">'+v+'</span><button class="cb" onclick="ci(\''+id+'\')">+</button></div></div>';}
 
 function cbt(){
@@ -160,80 +160,92 @@ function cbt(){
   function tp(){return ic+id+iu;}
   function rm(n){var r=n,a=Math.min(ic,r);ic-=a;r-=a;var b=Math.min(id,r);id-=b;r-=b;iu-=Math.min(iu,r);}
   if(!tp()){S.cr={w:"d",x:"Aucune flotte",l:[]};R();return;}
-  if(!dn){S.cr={w:"i",x:"Neant 0 PN = defaite auto (errata)",l:[]};R();return;}
-  var net=Math.max(0,sd-iu);if(net>0){rm(net);lg.push("Approche: "+sd+"d - "+iu+"a = "+net+" nets");}
-  if(!tp()){S.cr={w:"d",x:"Elimine a l'Approche",l:lg};R();return;}
+  if(!dn){S.cr={w:"i",x:"Neant 0 PN = defaite auto",l:[]};R();return;}
+  var net=Math.max(0,sd-iu);if(net>0){rm(net);lg.push("App: "+sd+"d-"+iu+"a="+net);}
+  if(!tp()){S.cr={w:"d",x:"Elimine Approche",l:lg};R();return;}
   var sU=0;
   for(var r=1;r<=20&&tp()>0&&dn>0;r++){
     var iI=ic+id+iu*2,dI=dn,iD=tp()+(r===1?id:0),dD=dn,iA=sU?0:iu;
     if(iI>dI){dn=Math.max(0,dn-iD);if(dn>0){var n1=Math.max(0,dn-iA);if(iA)sU=1;rm(n1);}}
     else if(dI>iI){var n2=Math.max(0,dD-iA);if(iA)sU=1;rm(n2);if(tp()>0)dn=Math.max(0,dn-(tp()+(r===1?id:0)));}
     else{var n3=Math.max(0,dD-iA);if(iA)sU=1;rm(n3);dn=Math.max(0,dn-iD);}
-    lg.push("Salve "+r+": Env "+tp()+" | Def "+dn);
+    lg.push("S"+r+": E"+tp()+" D"+dn);
   }
-  if(tp()>0&&dn<=0)S.cr={w:"i",x:tp()+" cubes survivants",l:lg};
-  else if(dn>0)S.cr={w:"d",x:"Neant: "+dn+" cubes",l:lg};
-  else S.cr={w:"d",x:"Egalite = Defenseur gagne",l:lg};
+  if(tp()>0&&dn<=0)S.cr={w:"i",x:tp()+" surv.",l:lg};
+  else if(dn>0)S.cr={w:"d",x:"Neant:"+dn,l:lg};
+  else S.cr={w:"d",x:"Egal=Def",l:lg};
   R();
 }
+function onP(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){curPic=r.result;var p=document.getElementById("pp");if(p)p.innerHTML='<img class="pi" src="'+r.result+'">';};r.readAsDataURL(f);}
 
-function onP(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){curPic=r.result;var p=document.getElementById("pp");if(p)p.innerHTML='<img class="pi" src="'+r.result+'">';var b=document.getElementById("pbtn");if(b)b.textContent="Reprendre photo";};r.readAsDataURL(f);}
-
-function showSetup(){
-  S.setup=true;
-  document.getElementById("tabBar").style.display="none";
-  document.getElementById("mnu").style.display="none";
-  R();
-}
-
-function startGame(){
-  var sc=document.getElementById("inScenario").value.trim();
-  var ho=document.getElementById("inHouse").value;
-  var di=document.getElementById("inDiff").value;
-  S.scenario=sc||"Solo libre";
-  S.house=ho;
-  S.diff=di;
-  S.scB=di==="Facile"?60:di==="Moyen"?100:140;
-  S.setup=false;
+function startNew(){
+  var name=document.getElementById("inName").value.trim();
+  if(!name){document.getElementById("inName").style.borderColor="#ef4444";return;}
+  var sc=document.getElementById("inSc").value;
+  var ho=document.getElementById("inHo").value;
+  var di=document.getElementById("inDi").value;
+  S=newState(name,sc,ho,di);
+  saveGame();
+  screen="game";
   document.getElementById("tabBar").style.display="flex";
   R();
 }
 
-function R(){
-  var c=document.getElementById("ct");
-  if(S.setup){
-    document.getElementById("hsub").textContent="Configuration";
-    document.getElementById("hsts").innerHTML="";
-    var o='<div class="setup">';
-    o+='<h2>Nouvelle partie solo</h2>';
-    o+='<div><label>Scenario (ex: Tutorial, Solo 1-8, ou nom libre)</label><input id="inScenario" type="text" placeholder="Tutorial, Solo 3, Devil\'s Triangle..." value="'+S.scenario+'"></div>';
-    o+='<div><label>Maison</label><select id="inHouse">';
-    for(var i=0;i<HOUSES.length;i++)o+='<option'+(S.house===HOUSES[i]?' selected':'')+'>'+HOUSES[i]+'</option>';
-    o+='</select></div>';
-    o+='<div><label>Difficulte</label><select id="inDiff"><option'+(S.diff==="Facile"?' selected':'')+'>Facile</option><option'+(S.diff==="Moyen"?' selected':'')+'>Moyen</option><option'+(S.diff==="Difficile"?' selected':'')+'>Difficile</option></select></div>';
-    o+='<div style="background:#1a2236;border-radius:8px;padding:10px;font-size:.78rem;color:#94a3b8;line-height:1.6"><strong style="color:#f59e0b">Score de base du Neant :</strong><br>Facile = 60 | Moyen = 100 | Difficile = 140<br>+ Failles, Catastrophes, Gardiens, etc.</div>';
-    o+='<button class="start-btn" onclick="startGame()">Commencer la partie</button>';
-    o+='</div>';
-    c.innerHTML=o;
-    return;
-  }
+function fmtDate(ts){if(!ts)return"";var d=new Date(ts);return d.toLocaleDateString("fr-CA")+" "+d.toLocaleTimeString("fr-CA",{hour:"2-digit",minute:"2-digit"});}
 
+function R(){
+  var c=document.getElementById("ct"),o="";
+  // HOME
+  if(screen==="home"){
+    document.getElementById("hsub").textContent="";
+    document.getElementById("hsts").innerHTML="";
+    var saves=allSaves();var keys=Object.keys(saves).sort(function(a,b){return (saves[b].ts||0)-(saves[a].ts||0);});
+    o+='<div style="text-align:center;margin:20px 0 24px"><div style="font-size:1.4rem;font-weight:700;color:#f59e0b">VOIDFALL</div><div style="font-size:.82rem;color:#94a3b8;margin-top:4px">Companion Solo</div></div>';
+    if(keys.length>0){
+      o+='<div style="font-size:.85rem;font-weight:700;color:#e2e8f0;margin-bottom:8px">Continuer une partie</div>';
+      for(var i=0;i<keys.length;i++){var sv=saves[keys[i]];
+        o+='<div class="save-card"><div class="info"><div class="name">'+sv.saveName+'</div><div class="detail">'+sv.house+' | '+sv.scenario+' | '+sv.diff+'</div><div class="detail">C'+sv.cy+' M'+sv.rn+' '+(sv.ph==="eval"?"Eval":"Focus")+' | '+fmtDate(sv.ts)+'</div></div><div class="acts"><button class="del-btn" onclick="if(confirm(\'Supprimer ?\')){deleteGame(\''+keys[i].replace(/'/g,"\\'")+'\');}">&#10005;</button><button class="load-btn" onclick="loadGame(\''+keys[i].replace(/'/g,"\\'")+'\')">Charger</button></div></div>';
+      }
+      o+='<div style="height:16px"></div>';
+    }
+    o+='<button class="big-btn" style="background:#f59e0b;color:#000" onclick="screen=\'newgame\';R()">Nouvelle partie</button>';
+    c.innerHTML=o;return;
+  }
+  // NEW GAME
+  if(screen==="newgame"){
+    document.getElementById("hsub").textContent="Nouvelle partie";
+    document.getElementById("hsts").innerHTML="";
+    o+='<div style="display:flex;flex-direction:column;gap:14px;padding-top:10px">';
+    o+='<div><label>Nom de la partie *</label><input id="inName" placeholder="Ex: Dunlork Easy Run 1" autocomplete="off"></div>';
+    o+='<div><label>Scenario</label><select id="inSc">';
+    for(var i=0;i<SCENARIOS.length;i++)o+='<option>'+SCENARIOS[i]+'</option>';
+    o+='</select></div>';
+    o+='<div><label>Maison</label><select id="inHo">';
+    for(var i=0;i<HOUSES.length;i++)o+='<option>'+HOUSES[i]+'</option>';
+    o+='</select></div>';
+    o+='<div><label>Difficulte</label><select id="inDi">';
+    for(var i=0;i<DIFF.length;i++)o+='<option>'+DIFF[i]+'</option>';
+    o+='</select></div>';
+    o+='<div style="background:#1a2236;border-radius:8px;padding:10px;font-size:.78rem;color:#94a3b8;line-height:1.6"><strong style="color:#f59e0b">Score de base :</strong> Facile=60 | Moyen=100 | Difficile=140</div>';
+    o+='<button class="big-btn" style="background:#f59e0b;color:#000" onclick="startNew()">Commencer</button>';
+    o+='<button class="big-btn" style="background:#1a2236;color:#94a3b8;border:1px solid #2a3454" onclick="screen=\'home\';R()">Retour</button>';
+    o+='</div>';
+    c.innerHTML=o;return;
+  }
+  // GAME
   document.getElementById("hsub").textContent="C"+S.cy+" M"+S.rn+" "+(S.ph==="eval"?"Eval":"Focus")+" | "+S.house;
-  var h=document.getElementById("hsts");h.innerHTML=S.cats+"/4 cata<br>"+S.prm+" crises";h.style.color=S.cats>=3?"#ef4444":"#94a3b8";
-  var o="";
+  var h=document.getElementById("hsts");h.innerHTML=S.cats+"/4 cata<br>"+S.prm+" perm";h.style.color=S.cats>=3?"#ef4444":"#94a3b8";
 
   if(S.tab==="guide"){
     var ss=gs(),s=gc();
-    o+='<div class="svb"><button class="sv" style="color:#f59e0b" onclick="sv()">Sauvegarder</button><button class="sv" style="color:#94a3b8" onclick="rs()">Reset</button></div>';
-    o+='<div id="sm" style="font-size:.75rem;color:#22c55e;text-align:center;margin-bottom:8px;display:none"></div>';
     o+='<div class="bar">';for(var i=0;i<ss.length;i++)o+='<div class="pip'+(i<=S.si?" on":"")+'"></div>';o+='</div>';
-    o+='<div style="font-size:.7rem;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;letter-spacing:.04em">'+(S.ph==="eval"?"Phase Evaluation":"Phase Focus")+'</div>';
+    o+='<div style="font-size:.7rem;color:#94a3b8;text-transform:uppercase;margin-bottom:4px">'+(S.ph==="eval"?"Phase Evaluation":"Phase Focus")+'</div>';
     o+='<div class="c"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-size:.95rem;font-weight:700;color:#f59e0b;margin-bottom:6px;flex:1">'+s.t+'</div>';
     if(s.m)o+='<button class="ibtn" onclick="opI()">?</button>';
     o+='</div><div style="font-size:.84rem;white-space:pre-line;line-height:1.6">'+s.d+'</div></div>';
     if(s.p){
       o+='<div class="pz"><input type="file" accept="image/*" capture="environment" id="pi" onchange="onP(event)" style="display:none">';
-      o+='<button class="pb" id="pbtn" onclick="document.getElementById(\'pi\').click()">'+(curPic?"Reprendre photo":"Prendre photo")+'</button>';
+      o+='<button class="pb" onclick="document.getElementById(\'pi\').click()">'+(curPic?"Reprendre photo":"Prendre photo")+'</button>';
       o+='<div id="pp">'+(curPic?'<img class="pi" src="'+curPic+'">':'')+'</div></div>';
     }
     o+='<div class="nr"><button class="bp" onclick="pv()"'+(S.si===0?" disabled":"")+'>Prec</button>';
@@ -245,34 +257,27 @@ function R(){
     o+='<div class="c">'+ct("prm","Crises permanentes",S.prm)+ct("cats","Catastrophes",S.cats)+ct("grd","Gardiens",S.grd)+'</div>';
     if(S.cats>=3)o+='<div style="background:rgba(239,68,68,.15);border:1px solid #ef4444;border-radius:8px;padding:10px;margin-bottom:10px;font-size:.88rem;color:#ef4444;font-weight:700">'+(S.cats>=4?"DEFAITE IMMEDIATE !":"DANGER : "+S.cats+"/4")+'</div>';
     var imp=S.cats*20+S.prm*5+S.grd*10;
-    o+='<div class="c"><div style="font-size:.84rem;color:#94a3b8;line-height:1.8">Cata: <strong style="color:#ef4444">'+(S.cats*20)+'</strong> + Crises: <strong style="color:#f97316">'+(S.prm*5)+'</strong> + Gardiens: <strong>'+(S.grd*10)+'</strong><br><span style="border-top:1px solid #2a3454;display:block;padding-top:6px;margin-top:6px;font-weight:700;color:#f59e0b">Total: '+imp+' Inf Neant</span></div></div>';
+    o+='<div class="c" style="font-size:.84rem;color:#94a3b8;line-height:1.8">Cata: <strong style="color:#ef4444">'+(S.cats*20)+'</strong> + Perm: <strong style="color:#f97316">'+(S.prm*5)+'</strong> + Gardiens: <strong>'+(S.grd*10)+'</strong><br><span style="border-top:1px solid #2a3454;display:block;padding-top:6px;margin-top:6px;font-weight:700;color:#f59e0b">= '+imp+' Inf Neant</span></div>';
   }
   else if(S.tab==="combat"){
     o+='<div style="font-size:1rem;font-weight:700;color:#f59e0b;margin-bottom:10px">Combat</div>';
     o+='<div class="c" style="border-left:3px solid #f97316"><div style="font-size:.88rem;font-weight:700;color:#f97316;margin-bottom:6px">Envahisseur</div>'+ct("iCo","Corvettes",S.iCo)+ct("iDe","Destroyers",S.iDe)+ct("iCu","Cuirasses",S.iCu)+'</div>';
-    o+='<div class="c" style="border-left:3px solid #3b82f6"><div style="font-size:.88rem;font-weight:700;color:#3b82f6;margin-bottom:6px">Defenseur (Neant)</div>'+ct("dN","PN Neant",S.dN)+ct("dSD","Def Secteur",S.dSD)+'</div>';
+    o+='<div class="c" style="border-left:3px solid #3b82f6"><div style="font-size:.88rem;font-weight:700;color:#3b82f6;margin-bottom:6px">Defenseur</div>'+ct("dN","PN Neant",S.dN)+ct("dSD","Def Secteur",S.dSD)+'</div>';
     o+='<button style="width:100%;padding:12px;border-radius:8px;border:none;background:linear-gradient(135deg,#f97316,#ef4444);color:#fff;font-size:.92rem;font-weight:700;margin-bottom:10px" onclick="cbt()">Calculer</button>';
     if(S.cr){var w=S.cr.w==="i";o+='<div class="c" style="border-color:'+(w?"#f97316":"#3b82f6")+'"><div style="text-align:center;font-size:1rem;font-weight:700;color:'+(w?"#f97316":"#3b82f6")+';margin-bottom:6px">'+(w?"Victoire Envahisseur":"Victoire Defenseur")+'</div><div style="text-align:center;font-size:.84rem;color:#94a3b8;margin-bottom:6px">'+S.cr.x+'</div><div style="font-size:.74rem;font-family:monospace;color:#94a3b8">';for(var i=0;i<S.cr.l.length;i++)o+='<div>'+S.cr.l[i]+'</div>';o+='</div></div>';}
   }
   else if(S.tab==="score"){
     var vb=S.scB+S.scRi*30+S.scHa*20+S.scCa*20+S.scGr*10+S.scCo*5+S.scPr*5+S.scFa*3+S.scCr*2+S.scPo;
     o+='<div style="font-size:1rem;font-weight:700;color:#f59e0b;margin-bottom:10px">Score Final</div>';
-    o+='<div class="c"><div style="font-size:.82rem;font-weight:700;color:#ef4444;margin-bottom:8px">Score du Neant ('+S.diff+')</div>';
-    o+='<div class="df"><button class="db'+(S.scB===60?" on":"")+'" onclick="S.scB=60;S.diff=\'Facile\';R()">Facile</button><button class="db'+(S.scB===100?" on":"")+'" onclick="S.scB=100;S.diff=\'Moyen\';R()">Moyen</button><button class="db'+(S.scB===140?" on":"")+'" onclick="S.scB=140;S.diff=\'Difficile\';R()">Diff</button></div>';
-    o+=ct("scRi","Failles (&times;30)",S.scRi)+ct("scHa","Refuges incomplets (&times;20)",S.scHa)+ct("scCa","Catastrophes (&times;20)",S.scCa)+ct("scGr","Gardiens centraux (&times;10)",S.scGr)+ct("scCo","Techs Consumees (&times;5)",S.scCo)+ct("scPr","Crises permanentes (&times;5)",S.scPr)+ct("scFa","Maisons Dechues (&times;3)",S.scFa)+ct("scCr","Corruptions (&times;2)",S.scCr)+ct("scPo","Pop Neant (&times;1)",S.scPo)+'</div>';
+    o+='<div class="c"><div style="font-size:.82rem;font-weight:700;color:#ef4444;margin-bottom:8px">Neant ('+S.diff+')</div>';
+    o+='<div class="df"><button class="db'+(S.scB===60?" on":"")+'" onclick="S.scB=60;S.diff=\'Facile\';autoSave();R()">Facile</button><button class="db'+(S.scB===100?" on":"")+'" onclick="S.scB=100;S.diff=\'Moyen\';autoSave();R()">Moyen</button><button class="db'+(S.scB===140?" on":"")+'" onclick="S.scB=140;S.diff=\'Difficile\';autoSave();R()">Diff</button></div>';
+    o+=ct("scRi","Failles (&times;30)",S.scRi)+ct("scHa","Refuges (&times;20)",S.scHa)+ct("scCa","Catastrophes (&times;20)",S.scCa)+ct("scGr","Gardiens (&times;10)",S.scGr)+ct("scCo","Techs cons (&times;5)",S.scCo)+ct("scPr","Crises perm (&times;5)",S.scPr)+ct("scFa","Maisons Dech (&times;3)",S.scFa)+ct("scCr","Corruptions (&times;2)",S.scCr)+ct("scPo","Pop Neant (&times;1)",S.scPo)+'</div>';
     o+='<div class="c" style="border-color:#ef4444;text-align:center"><div style="font-size:.8rem;color:#94a3b8">Score Neant</div><div style="font-size:2.2rem;font-weight:700;color:#ef4444">'+vb+'</div></div>';
     o+='<div class="c"><div style="font-size:.85rem;font-weight:700;color:#22c55e;margin-bottom:6px">Votre Influence</div>'+ct("pI","Total",S.pI)+'</div>';
     if(S.pI>0){var win=S.pI>=vb;o+='<div style="border-radius:10px;padding:16px;text-align:center;background:'+(win?"rgba(34,197,94,.15)":"rgba(239,68,68,.15)")+";border:2px solid "+(win?"#22c55e":"#ef4444")+'"><div style="font-size:1.4rem;font-weight:700;color:'+(win?"#22c55e":"#ef4444")+'">'+(win?"VICTOIRE":"DEFAITE")+'</div><div style="font-size:.85rem;color:#94a3b8;margin-top:4px">'+S.pI+' vs '+vb+' ('+(win?"+":"")+(S.pI-vb)+')</div></div>';}
   }
   c.innerHTML=o;
 }
-
-// Cycle buttons
-var cr=document.getElementById("cyR");
-for(var i=1;i<=3;i++){var b=document.createElement("button");b.style.cssText="flex:1;padding:7px;border-radius:6px;border:1px solid #2a3454;background:#1a2236;color:#e2e8f0;font-size:.8rem;font-weight:600;cursor:pointer";b.textContent="Cycle "+i;b.dataset.c=i;b.onclick=function(){S.cy=parseInt(this.dataset.c);tglM();R();};cr.appendChild(b);}
-
-// Load
-try{var d=localStorage.getItem("vf3");if(d){S=JSON.parse(d);if(!S.setup){document.getElementById("tabBar").style.display="flex";}}}catch(e){}
 R();
 </script>
 </body>
