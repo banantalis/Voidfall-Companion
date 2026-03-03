@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Voidfall">
+<meta name="theme-color" content="#0a0e1a">
+<title>Voidfall Solo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#0a0e1a;color:#e2e8f0;font-family:system-ui,sans-serif;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;overscroll-behavior:none}
+button{font-family:inherit;cursor:pointer}
+.hdr{display:flex;align-items:center;padding:12px 14px;border-bottom:1px solid #2a3454;background:#111827;padding-top:max(12px,env(safe-area-inset-top))}
+.burger{background:none;border:none;color:#e2e8f0;font-size:1.3rem;margin-right:10px}
+.title{flex:1}.title h1{font-size:1rem;font-weight:700;color:#f59e0b;margin:0}.title small{font-size:.72rem;color:#94a3b8}
+.sts{font-size:.7rem;text-align:right;color:#94a3b8}
+.content{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+.card{background:#111827;border:1px solid #2a3454;border-radius:10px;padding:14px;margin-bottom:12px}
+.bar{display:flex;gap:3px;margin-bottom:10px}.pip{flex:1;height:4px;border-radius:2px;background:#2a3454}.pip.on{background:#f59e0b}
+.stt{font-size:.95rem;font-weight:700;color:#f59e0b;margin-bottom:6px;flex:1}
+.ibtn{background:none;border:1px solid #f59e0b;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:8px;color:#f59e0b;font-size:.85rem;font-weight:700}
+.desc{font-size:.82rem;white-space:pre-line;line-height:1.6}
+.pz{background:#1a2236;border:1px solid #2a3454;border-radius:10px;padding:14px;margin-bottom:12px}
+.pbtn{width:100%;padding:11px;border-radius:8px;border:2px dashed #2a3454;background:transparent;color:#f59e0b;font-size:.85rem;font-weight:600}
+.pimg{width:100%;border-radius:8px;max-height:200px;object-fit:contain;background:#000;margin-top:8px}
+.nr{display:flex;gap:8px}
+.bp{flex:1;padding:10px;border-radius:8px;border:1px solid #2a3454;background:#111827;color:#e2e8f0;font-size:.82rem}
+.bp:disabled{color:#2a3454}
+.bn{flex:2;padding:10px;border-radius:8px;border:none;background:#f59e0b;color:#000;font-size:.85rem;font-weight:700}
+.br{width:100%;margin-top:8px;padding:9px;border-radius:8px;border:1px solid #2a3454;background:#1a2236;color:#3b82f6;font-size:.8rem}
+.ctr{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #2a3454}
+.ctr span{font-size:.82rem}
+.cb{width:30px;height:30px;border-radius:6px;border:1px solid #2a3454;background:#1a2236;color:#e2e8f0;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+.cv{display:inline-block;width:28px;text-align:center;font-weight:700}
+.tabs{display:flex;border-top:1px solid #2a3454;background:#111827;flex-shrink:0;padding-bottom:max(4px,env(safe-area-inset-bottom))}
+.tab{flex:1;padding:10px 2px;text-align:center;font-size:.72rem;background:none;border:none;border-top:2px solid transparent;color:#94a3b8}
+.tab.on{color:#f59e0b;font-weight:700;border-top-color:#f59e0b}
+.mbg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.mdl{background:#111827;border:1px solid #f59e0b;border-radius:12px;padding:20px;max-width:400px;max-height:80vh;overflow-y:auto;width:100%}
+.mdl h3{font-size:.9rem;font-weight:700;color:#f59e0b;margin-bottom:12px}
+.mdl p{font-size:.84rem;line-height:1.7;white-space:pre-line}
+.mcl{background:none;border:none;color:#94a3b8;font-size:1.2rem;float:right}
+.mnu{background:#111827;border:1px solid #2a3454;padding:14px;position:fixed;top:50px;left:0;right:0;z-index:99;max-width:480px;margin:0 auto;display:none}
+.mnu a{display:block;padding:6px 0;color:#3b82f6;font-size:.82rem;text-decoration:none}
+.cyb{flex:1;padding:6px;border-radius:6px;border:1px solid #2a3454;background:#1a2236;color:#e2e8f0;font-size:.78rem}
+.cyb.on{background:#f59e0b;color:#000}
+.alt{background:rgba(239,68,68,.15);border:1px solid #ef4444;border-radius:8px;padding:10px;margin-bottom:10px;font-size:.85rem;color:#ef4444;font-weight:700}
+.svb{display:flex;gap:6px;margin-bottom:10px}
+.svn{flex:1;padding:8px;border-radius:6px;border:1px solid #2a3454;background:#1a2236;color:#f59e0b;font-size:.78rem;font-weight:600}
+.svm{font-size:.75rem;color:#22c55e;text-align:center;margin-bottom:8px;display:none}
+.df{display:flex;gap:6px;margin-bottom:8px}
+.db{flex:1;padding:6px;border-radius:6px;border:1px solid #2a3454;background:#1a2236;color:#e2e8f0;font-size:.76rem;font-weight:600}
+.db.on{background:#f59e0b;color:#000}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <button class="burger" onclick="tglM()">&#9776;</button>
+  <div class="title"><h1>VOIDFALL SOLO</h1><small id="hsub"></small></div>
+  <div class="sts" id="hsts"></div>
+</div>
+<div class="mnu" id="mnu">
+  <div style="font-weight:700;color:#f59e0b;margin-bottom:6px;font-size:.85rem">Documents</div>
+  <a href="https://www.supermeeple.com/wp-content/uploads/2015/02/FR_VOIDFALL-Rules.pdf" target="_blank">Regles FR</a>
+  <a href="https://www.supermeeple.com/wp-content/uploads/2015/02/FR_VOIDFALL-Compendium.pdf" target="_blank">Compendium FR</a>
+  <a href="https://mindclashgames.com/wp-content/uploads/2023/09/Voidfall-Official_Errata_Clarifications1.0.pdf" target="_blank">Errata officiel</a>
+  <div style="display:flex;gap:6px;margin-top:10px" id="cyR"></div>
+  <button onclick="tglM()" style="margin-top:8px;width:100%;padding:7px;background:#1a2236;border:1px solid #2a3454;border-radius:6px;color:#94a3b8">Fermer</button>
+</div>
+<div class="mbg" id="mbg" onclick="clM()"><div class="mdl" onclick="event.stopPropagation()"><button class="mcl" onclick="clM()">&#10005;</button><h3>Quoi photographier ?</h3><p id="mtxt"></p></div></div>
+<div class="content" id="ct"></div>
+<div class="tabs">
+  <button class="tab on" data-t="guide" onclick="stab('guide')">Guide</button>
+  <button class="tab" data-t="crise" onclick="stab('crise')">Crise</button>
+  <button class="tab" data-t="combat" onclick="stab('combat')">Combat</button>
+  <button class="tab" data-t="score" onclick="stab('score')">Score</button>
+</div>
+<script>
+var S={tab:"guide",cy:1,rn:1,ph:"focus",si:0,cats:0,prm:0,grd:0,iCo:3,iDe:0,iCu:0,dN:3,dSD:0,cr:null,scB:60,scRi:0,scHa:0,scCa:0,scGr:0,scCo:0,scPr:0,scFa:0,scCr:0,scPo:0,pI:0};
+var ST=[
+{t:"0. Reveler Crise",d:"Situation: piochez Crise du niveau.\nGuerre: ignorez.",p:1,i:"La carte Alerte est sur la pioche Alerte : SITUATION (I/II/III) ou GUERRE.\n\nSi Situation : piochez une carte Crise du niveau correspondant. Carte rectangulaire, fond sombre, titre, deux rangees d'icones (militaire haut, economique bas).\n\nPhotographiez les deux cartes ensemble."},
+{t:"1. Selection",d:"Choisissez Focus. Option: Commerce, Programme.",p:1,i:"Carte Focus = une carte de votre main avec 3 actions (icones a gauche). Vous en choisirez 2.\n\nProgramme = carte avec icone Focus correspondante en haut a droite.\n\nPhotographiez Focus + Programme si joue."},
+{t:"2. Actions",d:"2 des 3 actions Focus + Programme.\nResolvez Crises si possible.",p:1,i:"Vue d'ensemble : secteurs, flottes, pistes Civilisation, ressources.\n\nPlus c'est lisible, meilleur sera le conseil."},
+{t:"3. Nettoyage",d:"Max 2 Flotte/secteur. Max 4 Gloire.\nPlacer Programme.",p:0,i:""},
+{t:"4. Progression Neant",d:"Guerre: resoudre Crise OU Catastrophe.\nSituation: pousser Crises a droite.",p:1,i:"Plateau Crise : rectangle a 2 rangees de slots.\nHaut = militaire. Bas = economique.\nCartes glissent gauche→droite. Depasse = Catastrophe.\n\nPhotographiez le plateau complet."}
+];
+var EV=[
+{t:"1. Contre-Attaque",d:"Escarmouche + cout eco.\n-3 Inf/ressource manquante.",p:1,i:"Photographiez plateau Crise + ressources (Nourriture, Materiel, Energie, Credits)."},
+{t:"2. Entretien",d:"1 Nourr ou 2 Mat/Ener par unite.\n-3 Inf par manque.",p:0,i:""},
+{t:"3. Obj Galactiques",d:"Droite Evenement. Rouge=1. Vert=2.",p:1,i:"Evenement Galactique = grande carte pres du plateau central. Partie droite = objectifs.\nRouge = un seul. Vert = les deux.\n\nPhotographiez la carte entiere."},
+{t:"4. Obj Programme",d:"Scorez Programmes Purs (sans Corruption).",p:1,i:"Programmes sur fiche Maison (slots bas). Pur = sans Corruption.\n\nPhotographiez la fiche avec Programmes."},
+{t:"5. Recuperer Focus",d:"Reprenez Focus. Cycle 1: aussi Innovation.",p:0,i:""}
+];
+function gs(){return S.ph==="eval"?EV:ST;}
+function gc(){var s=gs();return s[S.si]||s[0];}
+function sv(){try{localStorage.setItem("vf",JSON.stringify(S));smsg("Sauvegarde OK");}catch(e){}}
+function ld(){try{var d=localStorage.getItem("vf");if(d){S=JSON.parse(d);R();smsg("Charge OK");}}catch(e){}}
+function rs(){if(confirm("Reset partie ?")){localStorage.removeItem("vf");location.reload();}}
+var smt;function smsg(t){var e=document.getElementById("sm");if(e){e.textContent=t;e.style.display="block";clearTimeout(smt);smt=setTimeout(function(){e.style.display="none";},2000);}}
+function tglM(){var m=document.getElementById("mnu");m.style.display=m.style.display==="none"?"block":"none";}
+function clM(){document.getElementById("mbg").style.display="none";}
+function opI(){var s=gc();if(s.i){document.getElementById("mtxt").textContent=s.i;document.getElementById("mbg").style.display="flex";}}
+function stab(t){S.tab=t;document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("on",b.dataset.t===t);});R();}
+function nx(){S.si++;var s=gs();if(S.si>=s.length){if(S.ph==="focus"){S.ph="eval";S.si=0;}else{if(S.cy<3)S.cy++;S.rn=1;S.ph="focus";S.si=0;}}R();}
+function pv(){if(S.si>0){S.si--;R();}}
+function nR(){S.rn++;S.ph="focus";S.si=0;R();}
+function ci(k){S[k]++;R();}
+function cd(k){if(S[k]>0)S[k]--;R();}
+function ct(id,lb,v){return '<div class="ctr"><span>'+lb+'</span><div style="display:flex;align-items:center;gap:4px"><button class="cb" onclick="cd(\''+id+'\')">-</button><span class="cv">'+v+'</span><button class="cb" onclick="ci(\''+id+'\')">+</button></div></div>';}
+function cbt(){
+  var ic=S.iCo,id=S.iDe,iu=S.iCu,dn=S.dN,sd=S.dSD,lg=[];
+  function tp(){return ic+id+iu;}
+  function rm(n){var r=n,a=Math.min(ic,r);ic-=a;r-=a;var b=Math.min(id,r);id-=b;r-=b;iu-=Math.min(iu,r);}
+  if(!tp()){S.cr={w:"d",x:"Aucune flotte",l:[]};R();return;}
+  if(!dn){S.cr={w:"i",x:"Neant 0 PN = defaite auto",l:[]};R();return;}
+  var net=Math.max(0,sd-iu);if(net>0){rm(net);lg.push("App: "+sd+"d-"+iu+"a="+net);}
+  if(!tp()){S.cr={w:"d",x:"Elimine Approche",l:lg};R();return;}
+  var sU=0;
+  for(var r=1;r<=20&&tp()>0&&dn>0;r++){
+    var iI=ic+id+iu*2,dI=dn,iD=tp()+(r===1?id:0),dD=dn,iA=sU?0:iu;
+    if(iI>dI){dn=Math.max(0,dn-iD);if(dn>0){var n=Math.max(0,dn-iA);if(iA)sU=1;rm(n);}}
+    else if(dI>iI){var n2=Math.max(0,dD-iA);if(iA)sU=1;rm(n2);if(tp()>0)dn=Math.max(0,dn-(tp()+(r===1?id:0)));}
+    else{var n3=Math.max(0,dD-iA);if(iA)sU=1;rm(n3);dn=Math.max(0,dn-iD);}
+    lg.push("S"+r+": E:"+tp()+" D:"+dn);
+  }
+  if(tp()>0&&dn<=0)S.cr={w:"i",x:tp()+" surv.",l:lg};
+  else if(dn>0)S.cr={w:"d",x:"Neant: "+dn,l:lg};
+  else S.cr={w:"d",x:"Egal=Def",l:lg};
+  R();
+}
+function onP(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var p=document.getElementById("pp");if(p)p.innerHTML='<img class="pimg" src="'+r.result+'">';};r.readAsDataURL(f);}
+function R(){
+  document.getElementById("hsub").textContent="Cycle "+S.cy+" - Manche "+S.rn+" - "+(S.ph==="eval"?"Eval":"Focus");
+  var h=document.getElementById("hsts");h.innerHTML=S.cats+"/4 cata<br>"+S.prm+" crises";h.style.color=S.cats>=3?"#ef4444":"#94a3b8";
+  var c=document.getElementById("ct"),o="";
+  if(S.tab==="guide"){
+    var ss=gs(),s=gc();
+    o+='<div class="svb"><button class="svn" onclick="sv()">Sauvegarder</button><button class="svn" onclick="ld()">Charger</button><button class="svn" onclick="rs()">Reset</button></div><div class="svm" id="sm"></div>';
+    o+='<div class="bar">';for(var i=0;i<ss.length;i++)o+='<div class="pip'+(i<=S.si?" on":"")+'"></div>';o+='</div>';
+    o+='<div style="font-size:.68rem;color:#94a3b8;text-transform:uppercase;margin-bottom:4px">'+(S.ph==="eval"?"Evaluation":"Phase Focus")+'</div>';
+    o+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div class="stt">'+s.t+'</div>';
+    if(s.i)o+='<button class="ibtn" onclick="opI()">i</button>';
+    o+='</div><div class="desc">'+s.d+'</div></div>';
+    if(s.p)o+='<div class="pz"><input type="file" accept="image/*" capture="environment" id="pi" onchange="onP(event)" style="display:none"><button class="pbtn" onclick="document.getElementById(\'pi\').click()">Prendre photo</button><div id="pp"></div></div>';
+    o+='<div class="nr"><button class="bp" onclick="pv()"'+(S.si===0?" disabled":"")+'>Prec</button><button class="bn" onclick="nx()">'+(S.si===ss.length-1?(S.ph==="focus"?"Evaluation":"Fin cycle"):"Suivant")+'</button></div>';
+    if(S.ph==="focus"&&S.si===ss.length-1)o+='<button class="br" onclick="nR()">Manche '+(S.rn+1)+'</button>';
+  }
+  else if(S.tab==="crise"){
+    o+='<div style="font-size:1rem;font-weight:700;color:#f59e0b;margin-bottom:10px">Plateau Crise</div>';
+    o+='<div class="card">'+ct("prm","Crises permanentes",S.prm)+ct("cats","Catastrophes",S.cats)+ct("grd","Gardiens",S.grd)+'</div>';
+    if(S.cats>=3)o+='<div class="alt">'+(S.cats>=4?"DEFAITE !":"DANGER : "+S.cats+"/4")+'</div>';
+    var imp=S.cats*20+S.prm*5+S.grd*10;
+    o+='<div class="card"><div style="font-size:.82rem;color:#94a3b8">Cata '+(S.cats*20)+' + Crises '+(S.prm*5)+' + Gardiens '+(S.grd*10)+' = <strong style="color:#f59e0b">'+imp+' Inf Neant</strong></div></div>';
+  }
+  else if(S.tab==="combat"){
+    o+='<div style="font-size:1rem;font-weight:700;color:#f59e0b;margin-bottom:10px">Combat</div>';
+    o+='<div class="card" style="border-left:3px solid #f97316"><div style="font-size:.85rem;font-weight:700;color:#f97316;margin-bottom:6px">Envahisseur</div>'+ct("iCo","Corvettes",S.iCo)+ct("iDe","Destroyers",S.iDe)+ct("iCu","Cuirasses",S.iCu)+'</div>';
+    o+='<div class="card" style="border-left:3px solid #3b82f6"><div style="font-size:.85rem;font-weight:700;color:#3b82f6;margin-bottom:6px">Defenseur</div>'+ct("dN","PN Neant",S.dN)+ct("dSD","Def Secteur",S.dSD)+'</div>';
+    o+='<button style="width:100%;padding:12px;border-radius:8px;border:none;background:#f97316;color:#fff;font-weight:700;margin-bottom:10px" onclick="cbt()">Calculer</button>';
+    if(S.cr){var w=S.cr.w==="i";o+='<div class="card" style="border-color:'+(w?"#f97316":"#3b82f6")+'"><div style="text-align:center;font-weight:700;color:'+(w?"#f97316":"#3b82f6")+';margin-bottom:6px">'+(w?"Victoire Envahisseur":"Victoire Defenseur")+'</div><div style="text-align:center;font-size:.82rem;color:#94a3b8;margin-bottom:6px">'+S.cr.x+'</div><div style="font-size:.72rem;font-family:monospace;color:#94a3b8">';for(var i=0;i<S.cr.l.length;i++)o+='<div>'+S.cr.l[i]+'</div>';o+='</div></div>';}
+  }
+  else if(S.tab==="score"){
+    var vb=S.scB+S.scRi*30+S.scHa*20+S.scCa*20+S.scGr*10+S.scCo*5+S.scPr*5+S.scFa*3+S.scCr*2+S.scPo;
+    o+='<div style="font-size:1rem;font-weight:700;color:#f59e0b;margin-bottom:10px">Score Final</div>';
+    o+='<div class="card"><div class="df"><button class="db'+(S.scB===60?" on":"")+'" onclick="S.scB=60;R()">Facile</button><button class="db'+(S.scB===100?" on":"")+'" onclick="S.scB=100;R()">Moyen</button><button class="db'+(S.scB===140?" on":"")+'" onclick="S.scB=140;R()">Diff</button></div>';
+    o+=ct("scRi","Failles (x30)",S.scRi)+ct("scHa","Refuges (x20)",S.scHa)+ct("scCa","Catastrophes (x20)",S.scCa)+ct("scGr","Gardiens (x10)",S.scGr)+ct("scCo","Techs cons (x5)",S.scCo)+ct("scPr","Crises perm (x5)",S.scPr)+ct("scFa","Maisons Dechues (x3)",S.scFa)+ct("scCr","Corruptions (x2)",S.scCr)+ct("scPo","Pop Neant (x1)",S.scPo)+'</div>';
+    o+='<div class="card" style="border-color:#ef4444;text-align:center"><div style="font-size:.78rem;color:#94a3b8">Score Neant</div><div style="font-size:2rem;font-weight:700;color:#ef4444">'+vb+'</div></div>';
+    o+='<div class="card">'+ct("pI","Votre Influence",S.pI)+'</div>';
+    if(S.pI>0){var w=S.pI>=vb;o+='<div style="border-radius:10px;padding:14px;text-align:center;margin-top:8px;background:'+(w?"rgba(34,197,94,.15)":"rgba(239,68,68,.15)")+";border:2px solid "+(w?"#22c55e":"#ef4444")+'"><div style="font-size:1.3rem;font-weight:700;color:'+(w?"#22c55e":"#ef4444")+'">'+(w?"VICTOIRE":"DEFAITE")+'</div><div style="font-size:.82rem;color:#94a3b8">'+S.pI+' vs '+vb+' ('+(w?"+":"")+(S.pI-vb)+')</div></div>';}
+  }
+  c.innerHTML=o;
+}
+var cr=document.getElementById("cyR");
+for(var i=1;i<=3;i++){var b=document.createElement("button");b.className="cyb"+(S.cy===i?" on":"");b.textContent="C"+i;b.dataset.c=i;b.onclick=function(){S.cy=parseInt(this.dataset.c);tglM();R();};cr.appendChild(b);}
+try{var d=localStorage.getItem("vf");if(d)S=JSON.parse(d);}catch(e){}
+R();
+</script>
+</body>
+</html>
