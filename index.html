@@ -93,6 +93,7 @@ button{font-family:var(--ft);cursor:pointer;touch-action:manipulation}
 .hex-map{position:relative;margin:0 auto 14px;overflow:visible}
 .hex-wrap{position:absolute;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);background:rgba(58,36,104,.45)}
 .hex-wrap.hw-own{background:#4a90d9}
+.hex-wrap.hw-own-corr{background:#c2762a}
 .hex-wrap.hw-nea{background:#7c3aad}
 .hex-wrap.hw-faille{background:#dc2626}
 .hex-wrap.hw-sel{background:#93c5fd;z-index:5}
@@ -100,14 +101,17 @@ button{font-family:var(--ft);cursor:pointer;touch-action:manipulation}
 .hex-cell.empty{background:#1a1230}
 .hex-cell.empty:active{background:#251845}
 .hex-cell.own{background:rgba(25,55,120,.95)}
+.hex-cell.own.corr{background:rgba(120,55,15,.95)}
 .hex-cell.nea{background:rgba(45,18,65,.95)}
 .hex-cell.faille{background:rgba(100,10,10,.95);cursor:default}
 .hc-co{font-size:.6rem;font-weight:700;color:var(--tx2);letter-spacing:.02em;line-height:1}
 .hc-in{font-size:.9rem;font-weight:700;color:#60a5fa;line-height:1}
+.hex-cell.own.corr .hc-in{color:#f5a623}
 .hex-cell.nea .hc-in{font-size:.55rem;line-height:1.1}
 .hc-sub{font-size:.5rem;font-weight:600;color:var(--tx2);line-height:1;opacity:.8}
 .hc-lbl{font-size:.55rem;font-weight:700;color:var(--ac);line-height:1;opacity:.7;letter-spacing:.02em}
 .hex-cell.own .hc-co{color:#93bbfc}
+.hex-cell.own.corr .hc-co{color:#f5c882}
 .hex-cell.nea .hc-co,.hex-cell.nea .hc-in{color:var(--ac)}
 .hex-cell.faille .hc-co{color:#fca5a5}
 .hex-cell.faille .hc-lbl{color:#fca5a5;opacity:1;font-size:.7rem}
@@ -1155,16 +1159,17 @@ function renderHexGrid(){
 
     var cls="hex-cell";
     if(pos.isFaille){
-      /* Faille sector: red border, still interactive */
-      if(t){cls+=t.own?" own":" nea";}else{cls+=" faille";}
+      if(t){cls+=t.own?" own":" nea";if(t.own&&!t.pur)cls+=" corr";}else{cls+=" faille";}
     } else if(t){
       cls+=t.own?" own":" nea";
+      if(t.own&&!t.pur)cls+=" corr";
     } else {
       cls+=" empty";
     }
 
     var wc="hex-wrap";
     if(pos.isFaille&&!t)wc+=" hw-faille";
+    else if(t&&t.own&&!t.pur)wc+=" hw-own-corr";
     else if(t&&t.own)wc+=" hw-own";
     else if(t&&!t.own)wc+=" hw-nea";
     if(selTile===pos.c)wc+=" hw-sel";
