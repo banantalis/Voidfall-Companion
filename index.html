@@ -92,27 +92,28 @@ button{font-family:var(--ft);cursor:pointer;touch-action:manipulation}
 /* === HEX GRID (flat-top honeycomb, like physical board) === */
 .hex-map{position:relative;margin:0 auto 14px;overflow:visible}
 .hex-wrap{position:absolute;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);background:rgba(58,36,104,.45)}
-.hex-wrap.hw-own{background:#4a90d9}
-.hex-wrap.hw-own-corr{background:#c2762a}
-.hex-wrap.hw-nea{background:#7c3aad}
+.hex-wrap.hw-own{background:#5b9fea}
+.hex-wrap.hw-nea{background:#c2762a}
+.hex-wrap.hw-md{background:#7c3aad}
 .hex-wrap.hw-faille{background:#dc2626}
 .hex-wrap.hw-sel{background:#93c5fd;z-index:5}
 .hex-cell{position:absolute;inset:2px;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);background:var(--bg3);border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--fth);cursor:pointer;padding:2px;gap:0}
 .hex-cell.empty{background:#1a1230}
 .hex-cell.empty:active{background:#251845}
-.hex-cell.own{background:rgba(25,55,120,.95)}
-.hex-cell.own.corr{background:rgba(120,55,15,.95)}
-.hex-cell.nea{background:rgba(45,18,65,.95)}
+.hex-cell.own{background:rgba(30,70,150,.95)}
+.hex-cell.nea{background:rgba(120,55,15,.95)}
+.hex-cell.md{background:rgba(55,20,80,.95)}
 .hex-cell.faille{background:rgba(100,10,10,.95);cursor:default}
 .hc-co{font-size:.6rem;font-weight:700;color:var(--tx2);letter-spacing:.02em;line-height:1}
-.hc-in{font-size:.9rem;font-weight:700;color:#60a5fa;line-height:1}
-.hex-cell.own.corr .hc-in{color:#f5a623}
-.hex-cell.nea .hc-in{font-size:.55rem;line-height:1.1}
+.hc-in{font-size:.9rem;font-weight:700;color:#93c5fd;line-height:1}
+.hex-cell.nea .hc-in{font-size:.55rem;line-height:1.1;color:var(--ac)}
+.hex-cell.md .hc-in{color:#f5a623}
+.hex-cell.md .hc-sub{color:#f5a623;opacity:1}
 .hc-sub{font-size:.5rem;font-weight:600;color:var(--tx2);line-height:1;opacity:.8}
 .hc-lbl{font-size:.55rem;font-weight:700;color:var(--ac);line-height:1;opacity:.7;letter-spacing:.02em}
-.hex-cell.own .hc-co{color:#93bbfc}
-.hex-cell.own.corr .hc-co{color:#f5c882}
-.hex-cell.nea .hc-co,.hex-cell.nea .hc-in{color:var(--ac)}
+.hex-cell.own .hc-co{color:#b8d8fc}
+.hex-cell.nea .hc-co{color:var(--ac)}
+.hex-cell.md .hc-co{color:#c9a0dc}
 .hex-cell.faille .hc-co{color:#fca5a5}
 .hex-cell.faille .hc-lbl{color:#fca5a5;opacity:1;font-size:.7rem}
 /* Voidstorm bars between hexes */
@@ -1158,18 +1159,20 @@ function renderHexGrid(){
     var t=S.tiles[pos.c];
 
     var cls="hex-cell";
+    var isMD=pos.lbl==="MD";
     if(pos.isFaille){
-      if(t){cls+=t.own?" own":" nea";if(t.own&&!t.pur)cls+=" corr";}else{cls+=" faille";}
+      if(t){cls+=t.own?" own":" nea";}else{cls+=" faille";}
+    } else if(isMD){
+      cls+=" md";
     } else if(t){
       cls+=t.own?" own":" nea";
-      if(t.own&&!t.pur)cls+=" corr";
     } else {
       cls+=" empty";
     }
 
     var wc="hex-wrap";
     if(pos.isFaille&&!t)wc+=" hw-faille";
-    else if(t&&t.own&&!t.pur)wc+=" hw-own-corr";
+    else if(isMD)wc+=" hw-md";
     else if(t&&t.own)wc+=" hw-own";
     else if(t&&!t.own)wc+=" hw-nea";
     if(selTile===pos.c)wc+=" hw-sel";
