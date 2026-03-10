@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.10.1">
+<meta name="app-version" content="2026.03.10.2">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -242,6 +242,7 @@ textarea{resize:vertical;min-height:60px}
       <button class="mnu-btn" style="flex:1;border-color:var(--ac);color:var(--ac);margin:0" onclick="tglMenu();doExportLight()"><i data-lucide="upload" class="ic"></i> EXPORTER</button>
     </div>
     <button class="mnu-btn" style="border-color:var(--ac2);color:var(--ac2)" onclick="tglMenu();askExportFull()"><i data-lucide="message-square-plus" class="ic"></i> Nouvelle discussion</button>
+    <button class="mnu-btn" style="border-color:#a78bfa;color:#a78bfa" onclick="tglMenu();exportSaveURL()"><i data-lucide="link" class="ic"></i> Backup (lien)</button>
     <button class="mnu-btn" style="border-color:var(--err);color:var(--err)" onclick="resetSetup()"><i data-lucide="settings" class="ic"></i> Modifier la partie</button>
   </div>
   <div style="margin-top:20px;font-size:.68rem;color:var(--tx2);text-align:center;line-height:1.6">Voidfall Solo Companion v3.1<br>Companion pour l'Agent IA<br><span style="color:var(--ac)">Ermenbracht</span></div>
@@ -262,7 +263,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.10.1";
+var APP_VERSION="2026.03.10.2";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -2378,6 +2379,39 @@ window.addEventListener("hashchange",function(){
   var hs=parseHash();
   if(hs&&hs.length&&curSaveId&&S){sel=hs;screen="input";R();}
 });
+
+/* =================================================================
+   SAVE BACKUP: export as URL, restore from ?save= parameter
+   ================================================================= */
+function exportSaveURL(){
+  if(!S||!curSaveId)return;
+  var data=JSON.stringify(S);
+  var b64=btoa(unescape(encodeURIComponent(data)));
+  var url=location.href.split("?")[0].split("#")[0]+"?save="+encodeURIComponent(b64);
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){alert("Lien de sauvegarde copié !");}).catch(function(){prompt("Copie ce lien :",url);});}
+  else{prompt("Copie ce lien :",url);}
+}
+(function(){
+  var params=new URLSearchParams(location.search);
+  var b64=params.get("save");
+  if(!b64)return;
+  try{
+    var json=decodeURIComponent(escape(atob(decodeURIComponent(b64))));
+    var data=JSON.parse(json);
+    if(!data.house||!data.scenario){alert("Données invalides");return;}
+    if(!confirm("Restaurer la partie "+data.house+" ("+data.scenario+") ?"))return;
+    var id=(data.saveName||"restore").replace(/\s/g,"").toLowerCase().slice(0,8)+Date.now().toString(36);
+    data.ts=Date.now();
+    localStorage.setItem("vft2_s_"+id,JSON.stringify(data));
+    var saves=getSaves();
+    saves.push({id:id,house:data.house,scenario:data.scenario,ts:data.ts,cy:data.cy||1,mn:data.mn||1});
+    setSavesIdx(saves);
+    /* Clean URL */
+    history.replaceState(null,"",location.href.split("?")[0]);
+    alert("Partie restaurée !");
+    location.reload();
+  }catch(e){alert("Erreur: "+e.message);}
+})();
 
 /* =================================================================
    AUTO-UPDATE CHECK — bypasses CDN cache, works on iOS Safari
