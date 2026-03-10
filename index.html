@@ -91,16 +91,16 @@ button{font-family:var(--ft);cursor:pointer;touch-action:manipulation}
 
 /* === HEX GRID (flat-top honeycomb, like physical board) === */
 .hex-map{position:relative;margin:0 auto 14px;overflow:visible}
-.hex-wrap{position:absolute;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);background:rgba(58,36,104,.5)}
-.hex-wrap.hw-own{background:#60a5fa}
-.hex-wrap.hw-nea{background:#c86a3e}
+.hex-wrap{position:absolute;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);background:rgba(58,36,104,.45)}
+.hex-wrap.hw-own{background:#4a90d9}
+.hex-wrap.hw-nea{background:#7c3aad}
 .hex-wrap.hw-faille{background:#dc2626}
 .hex-wrap.hw-sel{background:#93c5fd;z-index:5}
 .hex-cell{position:absolute;inset:2px;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);background:var(--bg3);border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--fth);cursor:pointer;padding:2px;gap:0}
-.hex-cell.empty{background:#0f1a3a}
-.hex-cell.empty:active{background:#182848}
-.hex-cell.own{background:rgba(30,58,138,.95)}
-.hex-cell.nea{background:rgba(60,30,15,.95)}
+.hex-cell.empty{background:#1a1230}
+.hex-cell.empty:active{background:#251845}
+.hex-cell.own{background:rgba(25,55,120,.95)}
+.hex-cell.nea{background:rgba(45,18,65,.95)}
 .hex-cell.faille{background:rgba(100,10,10,.95);cursor:default}
 .hc-co{font-size:.6rem;font-weight:700;color:var(--tx2);letter-spacing:.02em;line-height:1}
 .hc-in{font-size:.9rem;font-weight:700;color:#60a5fa;line-height:1}
@@ -112,7 +112,7 @@ button{font-family:var(--ft);cursor:pointer;touch-action:manipulation}
 .hex-cell.faille .hc-co{color:#fca5a5}
 .hex-cell.faille .hc-lbl{color:#fca5a5;opacity:1;font-size:.7rem}
 /* Voidstorm bars between hexes */
-.vs-bar{position:absolute;background:linear-gradient(90deg,#b45309,#f59e0b,#b45309);border-radius:3px;height:6px;z-index:3;opacity:.85}
+.vs-bar{position:absolute;background:#dc2626;border-radius:4px;height:8px;z-index:3;opacity:.9;box-shadow:0 0 6px rgba(220,38,38,.6)}
 
 /* === TILE DETAIL === */
 .td{background:var(--bg2);border:1px solid var(--ac2);border-radius:var(--rad);padding:14px;margin-bottom:10px}
@@ -1195,8 +1195,9 @@ function renderHexGrid(){
     o+='</button></div>';
   }
 
-  /* Voidstorm bars */
+  /* Voidstorm edge bars — drawn ON the shared hex edge (perpendicular to center-center line) */
   var storms=getScenarioStorms();
+  var edgeLen=HW*0.38; /* half-edge visual length */
   for(var s=0;s<storms.length;s++){
     var a=storms[s][0].split(","),b=storms[s][1].split(",");
     var ac=parseInt(a[0]),ar=parseInt(a[1]),bc=parseInt(b[0]),br=parseInt(b[1]);
@@ -1204,11 +1205,15 @@ function renderHexGrid(){
     var ay=(ar-minR)*VSPACE+(ac%2!==0?HH/2:0)+HH/2;
     var bx=(bc-minC)*HSPACE+HW/2;
     var by=(br-minR)*VSPACE+(bc%2!==0?HH/2:0)+HH/2;
+    /* midpoint of shared edge */
     var mx=(ax+bx)/2,my=(ay+by)/2;
+    /* perpendicular direction (the edge runs perpendicular to center-center) */
     var dx=bx-ax,dy=by-ay;
-    var len=Math.sqrt(dx*dx+dy*dy);
-    var angle=Math.atan2(dy,dx)*180/Math.PI;
-    o+='<div class="vs-bar" style="left:'+(mx-len*0.35)+'px;top:'+(my-3)+'px;width:'+(len*0.7)+'px;transform:rotate('+angle+'deg);transform-origin:center"></div>';
+    var dist=Math.sqrt(dx*dx+dy*dy);
+    var px=-dy/dist,py=dx/dist;
+    /* draw bar along shared edge */
+    var angle=Math.atan2(py,px)*180/Math.PI;
+    o+='<div class="vs-bar" style="left:'+(mx-edgeLen/2)+'px;top:'+(my-4)+'px;width:'+edgeLen+'px;transform:rotate('+angle+'deg);transform-origin:center"></div>';
   }
 
   o+='</div>';
