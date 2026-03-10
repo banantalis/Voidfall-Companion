@@ -132,11 +132,14 @@ button{font-family:var(--ft);cursor:pointer;touch-action:manipulation}
 
 /* === SEGMENTED CONTROL === */
 .td-seg{display:inline-flex;height:38px;flex-shrink:0}
-.td-seg button{border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx2);font-size:.72rem;font-weight:700;font-family:var(--fth);cursor:pointer;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:4px;transition:all .15s;position:relative;margin-left:-1.5px;z-index:0}
+.td-seg{flex-wrap:wrap;gap:0}
+.td-seg button{border:1.5px solid var(--brd);background:var(--bg3);color:var(--tx2);font-size:.65rem;font-weight:700;font-family:var(--fth);cursor:pointer;padding:0 10px;display:flex;align-items:center;justify-content:center;gap:3px;transition:all .15s;position:relative;margin-left:-1.5px;z-index:0}
 .td-seg button:first-child{margin-left:0;border-radius:10px 0 0 10px}
 .td-seg button:last-child{border-radius:0 10px 10px 0}
-.td-seg button.sj{background:rgba(56,191,194,.2);color:var(--ok);border-color:var(--ok);z-index:2;box-shadow:1.5px 0 0 0 var(--ok)}
-.td-seg button.sn{background:rgba(251,191,36,.2);color:#fbbf24;border-color:#fbbf24;z-index:2;box-shadow:-1.5px 0 0 0 #fbbf24}
+.td-seg button.sj{background:rgba(56,191,194,.2);color:var(--ok);border-color:var(--ok);z-index:2}
+.td-seg button.sn{background:rgba(251,191,36,.2);color:#fbbf24;border-color:#fbbf24;z-index:2}
+.td-seg button.sm{background:rgba(192,132,252,.2);color:#c084fc;border-color:#c084fc;z-index:2}
+.td-seg button.sf{background:rgba(248,113,113,.2);color:#f87171;border-color:#f87171;z-index:2}
 
 /* === SEARCHABLE DROPDOWN === */
 .sdp-trig{width:100%;padding:11px 14px;border-radius:8px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx);font-size:.84rem;font-family:var(--ft);text-align:left;display:flex;align-items:center;cursor:pointer;gap:6px}
@@ -766,8 +769,10 @@ function newState(nm,ho,sc,di){
   };
 }
 
-function newTile(own){
-  return {pop:0,gN:0,gE:0,gM:0,gC:0,gS:0,iBS:false,iCN:false,iDS:false,pur:true,cv:0,cb:0,grd:false,prm:0,glo:0,lib:0,own:own!==false};
+function newTile(typ){
+  /* typ: "j"=Joueur, "n"=Neant, "md"=Maison Dechue, "f"=Faille */
+  if(typ===true)typ="j";if(typ===false)typ="n";if(!typ)typ="n";
+  return {typ:typ,own:typ==="j",pop:0,gN:0,gE:0,gM:0,gC:0,gS:0,iBS:false,iCN:false,iDS:false,pur:typ!=="md",cv:0,ships:[],grd:false,prm:0,glo:0,lib:0};
 }
 
 /* Pré-remplissage automatique des tuiles selon le scénario */
@@ -930,8 +935,16 @@ function migrate(){
   if(!Array.isArray(S.glos)){var _og=typeof S.glo==="number"&&S.glo>0?S.glo:0;S.glos=[];for(var gi=0;gi<_og;gi++)S.glos.push(0);delete S.glo;delete S.gloD;}
   /* Ensure array/object fields */
   if(!Array.isArray(S.pr))S.pr=[{t:"",p:true,c:false},{t:"",p:true,c:false},{t:"",p:true,c:false},{t:"",p:true,c:false}];
-  /* Force all tile numeric fields to 0 if undefined/NaN */
-  if(S.tiles){for(var tk2 in S.tiles){var _t2=S.tiles[tk2];var tKeys=["pop","gN","gE","gM","gC","gS","cv","cb","prm","glo","lib"];for(var ti=0;ti<tKeys.length;ti++){if(typeof _t2[tKeys[ti]]!=="number"||isNaN(_t2[tKeys[ti]]))_t2[tKeys[ti]]=0;}}}
+  /* Force all tile numeric fields to 0 if undefined/NaN + migrate typ/ships */
+  if(S.tiles){for(var tk2 in S.tiles){var _t2=S.tiles[tk2];
+    var tKeys=["pop","gN","gE","gM","gC","gS","cv","prm","glo","lib"];
+    for(var ti=0;ti<tKeys.length;ti++){if(typeof _t2[tKeys[ti]]!=="number"||isNaN(_t2[tKeys[ti]]))_t2[tKeys[ti]]=0;}
+    /* Migrate typ from old own boolean */
+    if(!_t2.typ){_t2.typ=_t2.own?"j":"n";_t2.own=_t2.typ==="j";}
+    /* Migrate ships from old cv/cb */
+    if(!Array.isArray(_t2.ships)){_t2.ships=[];if(_t2.own&&_t2.cv>0){for(var si=0;si<_t2.cv;si++)_t2.ships.push({type:"corvette",cubes:0});}if(_t2.own)_t2.cv=0;}
+    delete _t2.cb;
+  }}
 }
 function resetSetup(){if(confirm("Modifier les infos de la partie ?")){screen="setup";tglMenu();R();}}
 
@@ -964,20 +977,29 @@ function delTile(c){if(!confirm("Supprimer ("+c+") ?")){return;}delete S.tiles[c
 function tadj(c,k,d,mn,mx){var t=S.tiles[c];if(!t)return;if(mn==null)mn=0;if(mx==null)mx=999;if(isNaN(t[k]))t[k]=0;t[k]=Math.max(mn,Math.min(mx,t[k]+d));saveState();R();}
 function ttog(c,k){var t=S.tiles[c];if(!t)return;t[k]=!t[k];saveState();R();}
 function cycG(c,k){var t=S.tiles[c];if(!t)return;t[k]=(t[k]+1)%3;saveState();R();}
-function tSetOwn(c,own){
+function tSetTyp(c,typ){
   var t=S.tiles[c];if(!t)return;
-  t.own=own;
-  /* If switching to player, set defaults */
-  if(own){t.pop=t.pop||1;t.pur=true;t.cv=0;t.grd=false;t.prm=0;t.glo=0;t.lib=0;}
-  /* If switching to néant, reset player fields */
-  else{t.pop=0;t.gN=0;t.gE=0;t.gM=0;t.gC=0;t.gS=0;t.iBS=false;t.iCN=false;t.iDS=false;t.pur=true;}
+  t.typ=typ;t.own=(typ==="j");
+  if(typ==="j"){t.pop=t.pop||1;t.pur=true;t.cv=0;t.grd=false;t.prm=0;t.lib=0;if(!Array.isArray(t.ships))t.ships=[];}
+  else if(typ==="n"){t.pur=true;if(!Array.isArray(t.ships))t.ships=[];}
+  else if(typ==="md"){t.pur=false;t.cv=0;t.grd=false;t.prm=0;t.lib=0;t.ships=[];}
+  else if(typ==="f"){t.pop=0;t.gN=0;t.gE=0;t.gM=0;t.gC=0;t.gS=0;t.iBS=false;t.iCN=false;t.iDS=false;t.pur=true;t.grd=false;t.prm=0;t.glo=0;t.lib=0;t.ships=[];}
   saveState();R();
 }
+/* Legacy wrapper */
+function tSetOwn(c,own){tSetTyp(c,own?"j":"n");}
 
 /* Position helpers */
 function cycCy(){S.cy=S.cy>=3?1:S.cy+1;saveState();R();}
 function cycMn(){S.mn=S.mn>=S.mnMax?1:S.mn+1;saveState();R();}
 function cycPh(){var ph=["prep","focus","eval"];var idx=ph.indexOf(S.ph);S.ph=ph[(idx+1)%3];saveState();R();}
+
+/* Ship helpers */
+var SHIP_TYPES=[{k:"chasseur",nm:"Chasseur"},{k:"corvette",nm:"Corvette"},{k:"fregate",nm:"Frégate"},{k:"croiseur",nm:"Croiseur"}];
+function addShip(c){var t=S.tiles[c];if(!t)return;if(!Array.isArray(t.ships))t.ships=[];t.ships.push({type:"corvette",cubes:0});saveState();R();}
+function rmShip(c,i){var t=S.tiles[c];if(!t||!t.ships)return;t.ships.splice(i,1);saveState();R();}
+function adjShipCubes(c,i,d){var t=S.tiles[c];if(!t||!t.ships||!t.ships[i])return;t.ships[i].cubes=Math.max(0,Math.min(10,t.ships[i].cubes+d));saveState();R();}
+function setShipType(c,i,v){var t=S.tiles[c];if(!t||!t.ships||!t.ships[i])return;t.ships[i].type=v;saveState();R();}
 
 /* Auto-count corruption cubes */
 function calcCor(){
@@ -985,7 +1007,7 @@ function calcCor(){
   if(S.cS)n++;if(S.cG)n++;if(S.cE)n++;
   for(var i=0;i<S.pr.length;i++){if(S.pr[i].c)n++;}
   if(S.oPcor)for(var j=0;j<S.oPcor.length;j++){if(S.oPcor[j])n++;}
-  if(S.tiles)for(var c in S.tiles){var t=S.tiles[c];if(t.own&&!t.pur)n++;}
+  if(S.tiles)for(var c in S.tiles){var t=S.tiles[c];if((t.typ==="j"&&!t.pur)||t.typ==="md")n++;}
   return n;
 }
 
@@ -1205,39 +1227,40 @@ function renderHexGrid(){
     var t=S.tiles[pos.c];
     var sd=scenSD[pos.c]; /* scenario default data as fallback */
 
+    /* Determine effective type */
+    var tp=t?t.typ:null;
+    /* If no tile data but scenario says MD or Faille, use that */
+    if(!tp&&pos.isFaille)tp="f";
+    if(!tp&&pos.lbl==="MD")tp="md";
+
     var cls="hex-cell";
-    var isMD=pos.lbl==="MD";
-    if(pos.isFaille){
-      cls+=(t&&t.own)?" own":" faille"; /* Faille = toujours rouge sauf si conquis */
-    } else if(isMD){
-      cls+=" md";
-    } else if(t){
-      cls+=t.own?" own":" nea";
-    } else if(sd){
-      cls+=" nea";
-    } else {
-      cls+=" empty";
-    }
+    if(tp==="j")cls+=" own";
+    else if(tp==="md")cls+=" md";
+    else if(tp==="f")cls+=" faille";
+    else if(tp==="n"||(sd&&!tp))cls+=" nea";
+    else cls+=" empty";
 
     var wc="hex-wrap";
-    if(pos.isFaille&&!(t&&t.own))wc+=" hw-faille";
-    else if(isMD)wc+=" hw-md";
-    else if(t&&t.own)wc+=" hw-own";
-    else if(t&&!t.own)wc+=" hw-nea";
-    else if(sd)wc+=" hw-nea";
+    if(tp==="f")wc+=" hw-faille";
+    else if(tp==="md")wc+=" hw-md";
+    else if(tp==="j")wc+=" hw-own";
+    else if(tp==="n"||(sd&&!tp))wc+=" hw-nea";
     if(selTile===pos.c)wc+=" hw-sel";
 
     o+='<div class="'+wc+'" style="left:'+x+'px;top:'+y+'px;width:'+HW+'px;height:'+HH+'px">';
     o+='<button class="'+cls+'" onclick="tapTile(\''+pos.c+'\')">';
     var topTxt=pos.secNum||pos.c;
     o+='<span class="hc-co">'+topTxt+'</span>';
-    if(isMD){
-      /* Maison Déchue: juste "MD" */
-      o+='<span class="hc-lbl" style="color:#c9a0dc;opacity:1;font-size:.7rem">MD</span>';
-    } else if(t){
-      if(t.own){
+    if(t){
+      if(tp==="j"){
         o+='<span class="hc-in">'+t.pop+'</span>';
         o+='<span class="hc-sub">'+(t.pur?'pur':'corr')+'</span>';
+      }else if(tp==="md"){
+        o+='<span class="hc-in">'+(t.pop||'')+'</span>';
+        o+='<span class="hc-sub" style="color:#c9a0dc">MD</span>';
+      }else if(tp==="f"){
+        o+='<span class="hc-in">'+(t.cv?t.cv+'\u00d7\u25a0':'')+'</span>';
+        o+='<span class="hc-sub">faille</span>';
       }else{
         var ni=[];
         if(t.cv)ni.push(t.cv+'\u00d7\u25a0');
@@ -1247,8 +1270,7 @@ function renderHexGrid(){
         if(t.grd)ni.push('G');
         var nTxt=ni.length?ni.join(' '):'\u2014';
         o+='<span class="hc-in">'+nTxt+'</span>';
-        var subLbl=pos.lbl||'n\u00e9ant';
-        o+='<span class="hc-sub">'+subLbl+'</span>';
+        o+='<span class="hc-sub">n\u00e9ant</span>';
       }
     } else if(sd){
       var ni=[];
@@ -1258,7 +1280,7 @@ function renderHexGrid(){
       if(sd.iDS)ni.push('DS');
       var nTxt=ni.length?ni.join(' '):'\u2014';
       o+='<span class="hc-in">'+nTxt+'</span>';
-      o+='<span class="hc-sub">n\u00e9ant</span>';
+      o+='<span class="hc-sub">'+(pos.lbl==="MD"?'MD':'n\u00e9ant')+'</span>';
     } else if(pos.lbl && pos.lbl!==pos.secNum){
       o+='<span class="hc-lbl">'+pos.lbl+'</span>';
     }
@@ -1292,56 +1314,96 @@ function renderHexGrid(){
 
 function renderTileDetail(c){
   var t=S.tiles[c];if(!t)return '';
+  var tp=t.typ||"n";
   var o='<div class="td">';
 
-  /* Header: coord + segmented control + delete */
+  /* Header: coord + 4-way segmented control + delete */
   o+='<div class="td-hdr">';
   o+='<span class="td-coord">'+L("hexagon","ic")+' ('+c+')</span>';
-  o+='<div class="td-seg">';
-  o+='<button class="'+(t.own?"sj":"")+'" onclick="tSetOwn(\''+c+'\',true)">'+L("user","ic-sm")+' Joueur</button>';
-  o+='<button class="'+(!t.own?"sn":"")+'" onclick="tSetOwn(\''+c+'\',false)">'+L("cloud","ic-sm")+' Néant</button>';
-  o+='</div>';
   o+='<button class="td-del" onclick="delTile(\''+c+'\')">'+L("trash-2","ic-sm")+'</button>';
   o+='</div>';
+  o+='<div class="td-seg" style="margin-bottom:10px;width:100%">';
+  o+='<button style="flex:1" class="'+(tp==="j"?"sj":"")+'" onclick="tSetTyp(\''+c+'\',\'j\')">'+L("user","ic-sm")+' Joueur</button>';
+  o+='<button style="flex:1" class="'+(tp==="n"?"sn":"")+'" onclick="tSetTyp(\''+c+'\',\'n\')">'+L("cloud","ic-sm")+' N\u00e9ant</button>';
+  o+='<button style="flex:1" class="'+(tp==="md"?"sm":"")+'" onclick="tSetTyp(\''+c+'\',\'md\')">'+L("crown","ic-sm")+' MD</button>';
+  o+='<button style="flex:1" class="'+(tp==="f"?"sf":"")+'" onclick="tSetTyp(\''+c+'\',\'f\')">'+L("flame","ic-sm")+' Faille</button>';
+  o+='</div>';
 
-  if(t.own){
-    /* === SECTEUR JOUEUR === */
+  /* --- Cubes Néant (n, f) --- */
+  if(tp==="n"||tp==="f"){
+    o+=tctr(c,"cv","Cubes N\u00e9ant",t.cv,0,10);
+  }
+
+  /* --- Population (j, n, md) --- */
+  if(tp==="j"||tp==="n"||tp==="md"){
     o+=tctr(c,"pop","Population",t.pop,0,6);
+  }
 
-    /* Guildes — chaque type sur sa propre ligne avec +/- */
+  /* --- Guildes (j, n, md) --- */
+  if(tp==="j"||tp==="n"||tp==="md"){
     for(var g=0;g<GUILDS.length;g++){
       var gg=GUILDS[g],v=t[gg.k];
       o+='<div class="td-row"><label><span style="color:'+gg.col+'">'+L(gg.ico,"ic-sm")+'</span> '+gg.nm+'</label><div class="mctr">';
-      o+='<button class="mctr-b" onclick="tadj(\''+c+'\',\''+gg.k+'\',-1,0,2)">−</button>';
+      o+='<button class="mctr-b" onclick="tadj(\''+c+'\',\''+gg.k+'\',-1,0,2)">\u2212</button>';
       o+='<span class="mctr-v">'+v+'</span>';
       o+='<button class="mctr-b" onclick="tadj(\''+c+'\',\''+gg.k+'\',1,0,2)">+</button></div></div>';
     }
+  }
 
-    /* Installations — toggles avec noms complets */
+  /* --- Installations (j=toutes, n=DS, md=toutes) --- */
+  if(tp==="j"||tp==="md"){
     o+='<div class="td-row"><label><span style="color:#60a5fa">'+L("satellite","ic-sm")+'</span> Base Stellaire</label>';
     o+='<span class="tgl'+(t.iBS?" on-g":"")+'" onclick="ttog(\''+c+'\',\'iBS\')">'+(t.iBS?L("check","ic-sm")+" Oui":"Non")+'</span></div>';
     o+='<div class="td-row"><label><span style="color:#4ade80">'+L("anchor","ic-sm")+'</span> Chantier Naval</label>';
     o+='<span class="tgl'+(t.iCN?" on-g":"")+'" onclick="ttog(\''+c+'\',\'iCN\')">'+(t.iCN?L("check","ic-sm")+" Oui":"Non")+'</span></div>';
-    o+='<div class="td-row"><label><span style="color:#f472b6">'+L("shield","ic-sm")+'</span> Défense de Secteur</label>';
+  }
+  if(tp==="j"||tp==="n"||tp==="md"){
+    o+='<div class="td-row"><label><span style="color:#f472b6">'+L("shield","ic-sm")+'</span> D\u00e9fense de Secteur</label>';
     o+='<span class="tgl'+(t.iDS?" on-g":"")+'" onclick="ttog(\''+c+'\',\'iDS\')">'+(t.iDS?L("check","ic-sm")+" Oui":"Non")+'</span></div>';
+  }
 
-    /* État Pur/Corrompu */
-    o+='<div class="td-row"><label>État</label>';
-    o+='<span class="tgl'+(t.pur?" on-g":" on-r")+'" onclick="ttog(\''+c+'\',\'pur\')">'+(t.pur?L("check","ic-sm")+" Pur":L("skull","ic-sm")+" Corrompu")+'</span>';
-    o+='</div>';
+  /* --- Pur/Corrompu (j=toggle, md=fixe corrompu) --- */
+  if(tp==="j"){
+    o+='<div class="td-row"><label>\u00c9tat</label>';
+    o+='<span class="tgl'+(t.pur?" on-g":" on-r")+'" onclick="ttog(\''+c+'\',\'pur\')">'+(t.pur?L("check","ic-sm")+" Pur":L("skull","ic-sm")+" Corrompu")+'</span></div>';
+  }
+  if(tp==="md"){
+    o+='<div class="td-row"><label>\u00c9tat</label><span class="tgl on-r" style="cursor:default">'+L("skull","ic-sm")+' Corrompu</span></div>';
+  }
 
-    /* Flottes */
-    o+=tctr(c,"cv","Corvettes",t.cv,0,10);
-    o+=tctr(c,"cb","Cubes défense",t.cb,0,10);
+  /* --- Gloire (j, n, md) --- */
+  if(tp==="j"||tp==="n"||tp==="md"){
+    o+=tctr(c,"glo",L("trophy","ic-sm")+" Gloire (valeur)",t.glo,0,10);
+  }
 
-  } else {
-    /* === SECTEUR NÉANT === */
-    o+=tctr(c,"cv","Cubes Néant",t.cv,0,10);
+  /* --- Néant-only: Gardien, Prime, Libération --- */
+  if(tp==="n"){
     o+='<div class="td-row"><label>'+L("shield","ic-sm")+' Gardien</label>';
     o+='<span class="tgl'+(t.grd?" on-y":"")+'" onclick="ttog(\''+c+'\',\'grd\')">'+(t.grd?L("eye","ic-sm")+" Oui":"Non")+'</span></div>';
     o+=tctr(c,"prm",L("gift","ic-sm")+" Jetons Prime",t.prm,0,3);
-    o+=tctr(c,"glo",L("trophy","ic-sm")+" Gloire (valeur)",t.glo,0,10);
-    o+=tctr(c,"lib",L("unlock","ic-sm")+" Jetons Libération",t.lib,0,3);
+    o+=tctr(c,"lib",L("unlock","ic-sm")+" Jetons Lib\u00e9ration",t.lib,0,3);
+  }
+
+  /* --- Vaisseaux (j seulement) --- */
+  if(tp==="j"){
+    o+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid rgba(58,36,104,.3)"><span style="font-weight:700;font-size:.78rem">'+L("rocket","ic-sm")+' Vaisseaux</span>';
+    o+='<button style="padding:3px 10px;border-radius:6px;border:1px solid var(--ac);background:transparent;color:var(--ac);font-size:.68rem;font-weight:700" onclick="addShip(\''+c+'\')">+ Ajouter</button></div>';
+    var sh=t.ships||[];
+    for(var si=0;si<sh.length;si++){
+      var s=sh[si],stNm="";for(var st=0;st<SHIP_TYPES.length;st++){if(SHIP_TYPES[st].k===s.type)stNm=SHIP_TYPES[st].nm;}
+      o+='<div class="td-row" style="gap:6px;flex-wrap:nowrap">';
+      o+='<select style="font-size:.7rem;padding:4px 6px;border-radius:6px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx);flex:0 0 auto" onchange="setShipType(\''+c+'\','+si+',this.value)">';
+      for(var st2=0;st2<SHIP_TYPES.length;st2++){
+        o+='<option value="'+SHIP_TYPES[st2].k+'"'+(s.type===SHIP_TYPES[st2].k?' selected':'')+'>'+SHIP_TYPES[st2].nm+'</option>';
+      }
+      o+='</select>';
+      o+='<div class="mctr"><button class="mctr-b" onclick="adjShipCubes(\''+c+'\','+si+',-1)">\u2212</button>';
+      o+='<span class="mctr-v" style="font-size:.75rem">'+s.cubes+'</span>';
+      o+='<button class="mctr-b" onclick="adjShipCubes(\''+c+'\','+si+',1)">+</button></div>';
+      o+='<span style="font-size:.6rem;color:var(--tx2)">cubes</span>';
+      o+='<button style="width:22px;height:22px;border-radius:5px;border:1px solid var(--err);background:transparent;color:var(--err);font-size:.55rem;display:flex;align-items:center;justify-content:center;margin-left:8px;opacity:.5;flex-shrink:0" onclick="if(confirm(\'Supprimer ce vaisseau ?\'))rmShip(\''+c+'\','+si+')">'+L("x","ic-sm")+'</button>';
+      o+='</div>';
+    }
   }
 
   o+='</div>';
@@ -1487,7 +1549,7 @@ function rSec_cri(){
   var _cpis=(S.cS?1:0)+(S.cG?1:0)+(S.cE?1:0);
   var _cprg=0;for(var pi=0;pi<S.pr.length;pi++){if(S.pr[pi].c)_cprg++;}
   var _coff=0;if(S.oPcor)for(var oi2=0;oi2<S.oPcor.length;oi2++){if(S.oPcor[oi2])_coff++;}
-  var _ctil=0;if(S.tiles)for(var ck in S.tiles){if(S.tiles[ck].own&&!S.tiles[ck].pur)_ctil++;}
+  var _ctil=0;if(S.tiles)for(var ck in S.tiles){var _tt=S.tiles[ck];if((_tt.typ==="j"&&!_tt.pur)||_tt.typ==="md")_ctil++;}
   o+='<div class="card"><div class="card-t">'+L("skull")+'Corruption</div>';
   o+='<div style="font-size:1.3rem;font-weight:700;text-align:center;color:'+(_cc>0?'var(--err)':'var(--ok)')+';margin:8px 0">'+_cc+' cube'+(_cc>1?'s':'')+' corruption</div>';
   o+='<div style="font-size:.66rem;color:var(--tx2);line-height:1.6;margin-bottom:4px">';
@@ -1688,38 +1750,50 @@ function genSave(){
     LN.push("");
     LN.push("--- SECTEURS ---");
     var coords=Object.keys(S.tiles).sort();
-    var pS=[],nS=[];
-    for(var i=0;i<coords.length;i++){var cc=coords[i];var tt=S.tiles[cc];if(tt.own)pS.push({c:cc,t:tt});else nS.push({c:cc,t:tt});}
-    if(pS.length===0){LN.push("Aucun secteur controle");}
-    else{
-      for(var i=0;i<pS.length;i++){
-        var s=pS[i],t=s.t;
-        var guilds=[];
-        for(var gg=0;gg<GUILDS.length;gg++){var gl=GUILDS[gg];if(t[gl.k]>0)guilds.push(t[gl.k]+"x "+gl.nm);}
-        var inst=[];
-        if(t.iBS)inst.push("Base Stellaire");
-        if(t.iCN)inst.push("Chantier Naval");
-        if(t.iDS)inst.push("Defense de Secteur");
-        var ln="("+s.c+"): Pop "+t.pop;
-        ln+=" | Guildes: "+(guilds.length?guilds.join(", "):"aucune");
-        ln+=" | Install: "+(inst.length?inst.join(", "):"aucune");
-        ln+=" | "+(t.pur?"Pur":"Corrompu");
-        if(t.cv)ln+=" | Flottes: "+t.cv+" Corvette(s)";
-        if(t.cb)ln+=" "+t.cb+" cubes";
+    var _byTyp={j:[],n:[],md:[],f:[]};
+    for(var i=0;i<coords.length;i++){var cc=coords[i];var tt=S.tiles[cc];var _tp=tt.typ||"n";if(!_byTyp[_tp])_byTyp[_tp]=[];_byTyp[_tp].push({c:cc,t:tt});}
+    /* Helper: guilds + installations string */
+    function _tileInfo(t,tp){
+      var guilds=[];
+      for(var gg=0;gg<GUILDS.length;gg++){var gl=GUILDS[gg];if(t[gl.k]>0)guilds.push(t[gl.k]+"x "+gl.nm);}
+      var inst=[];
+      if(t.iBS)inst.push("BS");if(t.iCN)inst.push("CN");if(t.iDS)inst.push("DS");
+      var ln="Pop "+t.pop;
+      ln+=" | Guildes: "+(guilds.length?guilds.join(", "):"aucune");
+      ln+=" | Install: "+(inst.length?inst.join(", "):"aucune");
+      if(t.glo)ln+=" | Gloire: "+t.glo;
+      return ln;
+    }
+    if(_byTyp.j.length){
+      LN.push("SECTEURS JOUEUR:");
+      for(var i=0;i<_byTyp.j.length;i++){
+        var s=_byTyp.j[i],t=s.t;
+        var ln="("+s.c+"): "+_tileInfo(t,"j")+" | "+(t.pur?"Pur":"Corrompu");
+        if(t.ships&&t.ships.length){var sh=[];for(var si=0;si<t.ships.length;si++){sh.push(t.ships[si].type+"("+t.ships[si].cubes+"c)");}ln+=" | Flotte: "+sh.join(", ");}
+        LN.push(ln);
+      }
+    }else{LN.push("Aucun secteur controle");}
+    if(_byTyp.n.length){
+      LN.push("");LN.push("SECTEURS NEANT:");
+      for(var i=0;i<_byTyp.n.length;i++){
+        var s=_byTyp.n[i],t=s.t;
+        var ln="("+s.c+"): "+t.cv+" cubes Neant | "+_tileInfo(t,"n");
+        if(t.grd)ln+=" | Gardien";if(t.prm)ln+=" | Prime:"+t.prm;if(t.lib)ln+=" | Lib:"+t.lib;
         LN.push(ln);
       }
     }
-    if(nS.length>0){
-      LN.push("");
-      LN.push("SECTEURS DU NEANT adjacents:");
-      for(var i=0;i<nS.length;i++){
-        var s=nS[i],t=s.t;
-        var ln="("+s.c+"): "+t.cv+" cubes Neant";
-        if(t.grd)ln+=" | Gardien: oui";
-        if(t.prm)ln+=" | Prime: "+t.prm;
-        if(t.glo)ln+=" | Gloire: valeur "+t.glo;
-        if(t.lib)ln+=" | Liberation: "+t.lib;
-        LN.push(ln);
+    if(_byTyp.md.length){
+      LN.push("");LN.push("MAISONS DECHUES:");
+      for(var i=0;i<_byTyp.md.length;i++){
+        var s=_byTyp.md[i],t=s.t;
+        LN.push("("+s.c+"): "+_tileInfo(t,"md")+" | Corrompu");
+      }
+    }
+    if(_byTyp.f.length){
+      LN.push("");LN.push("FAILLES:");
+      for(var i=0;i<_byTyp.f.length;i++){
+        var s=_byTyp.f[i],t=s.t;
+        LN.push("("+s.c+"): "+t.cv+" cubes Neant");
       }
     }
   }
@@ -1806,7 +1880,7 @@ function genSave(){
   LN.push("coms:[int,...], glos:[int,...], rf:[{n:0-2},{n:0-2}]");
   LN.push("oPcor:[bool,bool,bool,bool](corruption Offre: Soutien,Force,Richesse,Domination)");
   LN.push('fc:{cq:bool,...}, pr:[{t:"nom",p:bool,c:bool},...](4 slots)');
-  LN.push('tiles:{"col,row":{pop,gN,gE,gM,gC,gS,iBS,iCN,iDS,pur,cv,cb,grd,prm,glo,lib,own}}');
+  LN.push('tiles:{"col,row":{typ("j"/"n"/"md"/"f"),pop,gN,gE,gM,gC,gS,iBS,iCN,iDS,pur,cv,grd,prm,glo,lib,ships:[{type,cubes}]}}');
   LN.push("");
   LN.push("=== CLE _notes — OBLIGATOIRE, C'EST LE PLUS IMPORTANT ===");
   LN.push("_notes est AJOUTE au journal (pas remplace). C'est un PROMPT DE CONTINUATION pour ton futur toi.");
@@ -1872,12 +1946,14 @@ function genLight(){
     LN.push("--- SECTEURS ---");
     var coords=Object.keys(S.tiles).sort();
     for(var i=0;i<coords.length;i++){
-      var cc=coords[i],tt=S.tiles[cc];
+      var cc=coords[i],tt=S.tiles[cc];var _tp2=tt.typ||"n";
       var guilds=[];
       for(var gg=0;gg<GUILDS.length;gg++){var gl=GUILDS[gg];if(tt[gl.k]>0)guilds.push(tt[gl.k]+"x "+gl.nm);}
       var inst=[];if(tt.iBS)inst.push("BS");if(tt.iCN)inst.push("CN");if(tt.iDS)inst.push("DS");
-      if(tt.own){LN.push("("+cc+"): Pop "+tt.pop+" | "+(guilds.length?guilds.join(", "):"∅")+" | "+(inst.length?inst.join(","):"∅")+" | "+(tt.pur?"Pur":"Corr")+(tt.cv?" | "+tt.cv+"cv":""));}
-      else{LN.push("("+cc+"): Neant "+tt.cv+"cv"+(tt.grd?" Gardien":"")+(tt.prm?" Prime:"+tt.prm:""));}
+      if(_tp2==="j"){var shS="";if(tt.ships&&tt.ships.length){var _sa=[];for(var si=0;si<tt.ships.length;si++){_sa.push(tt.ships[si].type+"("+tt.ships[si].cubes+"c)");}shS=" | "+_sa.join(",");}LN.push("("+cc+")[J]: Pop "+tt.pop+" | "+(guilds.length?guilds.join(", "):"\u2205")+" | "+(inst.length?inst.join(","):"\u2205")+" | "+(tt.pur?"Pur":"Corr")+shS);}
+      else if(_tp2==="md"){LN.push("("+cc+")[MD]: Pop "+tt.pop+" | "+(guilds.length?guilds.join(", "):"\u2205")+" | "+(inst.length?inst.join(","):"\u2205")+" | Corr"+(tt.glo?" | Glo:"+tt.glo:""));}
+      else if(_tp2==="f"){LN.push("("+cc+")[F]: "+tt.cv+"cv");}
+      else{LN.push("("+cc+")[N]: "+tt.cv+"cv | Pop "+tt.pop+" | "+(guilds.length?guilds.join(", "):"\u2205")+" | "+(inst.length?inst.join(","):"\u2205")+(tt.grd?" Gardien":"")+(tt.prm?" Prime:"+tt.prm:"")+(tt.glo?" Glo:"+tt.glo:""));}
     }
   }
 
