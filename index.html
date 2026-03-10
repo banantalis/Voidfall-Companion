@@ -2016,6 +2016,11 @@ function renderPosBar(){
   var pb=document.getElementById("posBar");
   var phCls={prep:"on-b",focus:"on-y",eval:"on-r"}[S.ph];
   var phNm={prep:"A · Préparation",focus:"B · Focus",eval:"C · Évaluation"}[S.ph];
+  /* Focus progress: count played vs total */
+  var fl=getFocus(S.house),fcTotal=0,fcInH=0;
+  for(var fi=0;fi<fl.length;fi++){var ff=fl[fi];if(ff.c2&&S.cy<2)continue;fcTotal++;if(S.fc[ff.k])fcInH++;}
+  var fcPlayed=fcTotal-fcInH;
+  if(S.ph==="focus")phNm+=' <span style="font-size:.7rem;opacity:.85">'+fcPlayed+'/'+fcTotal+'</span>';
   var o='<span style="font-size:.72rem;color:var(--tx2);font-weight:600">Cycle</span>';
   o+='<span class="pos-chip on-o" onclick="cycCy()">'+S.cy+'</span>';
   o+='<span style="font-size:.72rem;color:var(--tx2);font-weight:600">Manche</span>';
