@@ -91,20 +91,23 @@ button{font-family:var(--ft);cursor:pointer;touch-action:manipulation}
 
 /* === HEX GRID === */
 .hex-map{margin-bottom:14px;padding:4px 0}
-.hex-row{display:flex;gap:6px;justify-content:center;margin-bottom:5px}
-.hex-row.off{padding-left:37px}
-.hex-cell{width:68px;height:58px;border-radius:12px;border:2px solid var(--brd);background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--fth);cursor:pointer;transition:all .12s;padding:4px;gap:2px}
+.hex-row{display:flex;gap:4px;justify-content:flex-start;margin-bottom:3px;padding-left:4px}
+.hex-row.off{padding-left:35px}
+.hex-cell{width:58px;height:48px;border-radius:10px;border:2px solid var(--brd);background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--fth);cursor:pointer;transition:all .12s;padding:3px;gap:1px;flex-shrink:0}
+.hex-cell.empty{opacity:.18;border-style:dashed;border-color:var(--brd);background:transparent}
+.hex-cell.empty:active{opacity:.5;background:var(--bg3)}
 .hex-cell.own{border-color:var(--ok);background:rgba(56,191,194,.08)}
 .hex-cell.own.corr{border-color:var(--err);background:rgba(232,67,147,.08)}
 .hex-cell.nea{border-color:var(--ac);background:rgba(232,120,78,.08)}
 .hex-cell.sel{box-shadow:0 0 0 3px var(--ac2);transform:scale(1.08)}
 .hex-cell:active{transform:scale(.92)}
-.hc-co{font-size:.66rem;font-weight:700;color:var(--tx2);letter-spacing:.02em;line-height:1}
-.hc-in{font-size:.9rem;font-weight:700;color:var(--ok);line-height:1}
-.hc-sub{font-size:.5rem;font-weight:600;color:var(--tx2);line-height:1;opacity:.7}
+.hc-co{font-size:.62rem;font-weight:700;color:var(--tx2);letter-spacing:.02em;line-height:1}
+.hc-in{font-size:.88rem;font-weight:700;color:var(--ok);line-height:1}
+.hc-sub{font-size:.48rem;font-weight:600;color:var(--tx2);line-height:1;opacity:.7}
 .hex-cell.own .hc-co{color:var(--ok)}
 .hex-cell.own.corr .hc-co,.hex-cell.own.corr .hc-in{color:var(--err)}
 .hex-cell.nea .hc-co,.hex-cell.nea .hc-in{color:var(--ac)}
+.hex-lbl{position:absolute;left:0;font-size:.52rem;color:var(--tx2);opacity:.25;font-family:var(--fth);font-weight:600}
 
 /* === TILE DETAIL === */
 .td{background:var(--bg2);border:1px solid var(--ac2);border-radius:var(--rad);padding:14px;margin-bottom:10px}
@@ -370,7 +373,7 @@ var PROG_S=["S1 Le Projet Du Salut","S2 Conglomérat Industriel","S3 Syndicats A
 var PROG_W=["W1 Armada Augmentée","W2 Bond Quantique","W3 Singularité Technologique","W4 Monopole Commercial","W5 La Directive Rédemption","W6 Campagne Autogérée","W7 Pointe De La Technologie","W8 Suprématie Intellectuelle"];
 var PROG_ALL=PROG_D.concat(PROG_M).concat(PROG_S).concat(PROG_W);
 
-var GRID_COLS=4,GRID_ROWS=3;
+var GRID_COLS=4,GRID_ROWS=9;
 
 /* =================================================================
    STATE
@@ -715,15 +718,22 @@ function tctr(coord,key,label,val,mn,mx){
    HEX GRID + TILE DETAIL RENDERERS
    ================================================================= */
 function renderHexGrid(){
-  var o='<div class="hex-map">';
-  for(var row=GRID_ROWS;row>=1;row--){
+  /* Determine visible row range: show all rows that have tiles + 1 padding, minimum rows 1-3 */
+  var minR=GRID_ROWS,maxR=1;
+  for(var k in S.tiles){if(S.tiles.hasOwnProperty(k)){var parts=k.split(",");var r=parseInt(parts[1]);if(r<minR)minR=r;if(r>maxR)maxR=r;}}
+  if(minR>maxR){minR=1;maxR=3;} /* no tiles yet — show rows 1-3 */
+  minR=Math.max(1,minR-1);maxR=Math.min(GRID_ROWS,maxR+1);
+
+  var o='<div class="hex-map" style="position:relative">';
+  for(var row=maxR;row>=minR;row--){
     var isOff=row%2===0;
-    o+='<div class="hex-row'+(isOff?" off":"")+'">';
+    o+='<div class="hex-row'+(isOff?" off":"")+'" style="position:relative">';
     for(var col=1;col<=GRID_COLS;col++){
       var c=col+","+row;
       var t=S.tiles[c];
       var cls="hex-cell";
       if(t){cls+=t.own?" own":" nea";if(t.own&&!t.pur)cls+=" corr";}
+      else{cls+=" empty";}
       if(selTile===c)cls+=" sel";
       o+='<button class="'+cls+'" onclick="tapTile(\''+c+'\')">';
       o+='<span class="hc-co">'+c+'</span>';
@@ -733,13 +743,17 @@ function renderHexGrid(){
           o+='<span class="hc-sub">'+(t.pur?'pur':'corr')+'</span>';
         }else{
           o+='<span class="hc-in">'+t.cv+'</span>';
-          o+='<span class="hc-sub">'+(t.grd?'gardien':'néant')+'</span>';
+          o+='<span class="hc-sub">'+(t.grd?'gardien':'n\u00e9ant')+'</span>';
         }
       }
       o+='</button>';
     }
     o+='</div>';
   }
+  /* Legend */
+  o+='<div style="display:flex;justify-content:space-between;padding:4px 4px 0;font-size:.5rem;color:var(--tx2);opacity:.4">';
+  o+='<span>\u2191 N\u00e9ant (haut)</span><span>Secteur-M\u00e8re (bas) \u2193</span>';
+  o+='</div>';
   o+='</div>';
   return o;
 }
@@ -889,7 +903,7 @@ function rSec_prog(){
 
 function rSec_sec(){
   var o='<div class="card"><div class="card-t">'+L("hexagon")+'Secteurs</div>';
-  o+='<div style="font-size:.68rem;color:var(--tx2);margin-bottom:8px;text-align:center">Tapez une case pour ajouter/modifier un secteur</div>';
+  o+='<div style="font-size:.68rem;color:var(--tx2);margin-bottom:8px;text-align:center">Tapez une position pour cr\u00e9er un secteur. Placez-les comme sur votre sc\u00e9nario.</div>';
   o+=renderHexGrid();
   o+='</div>';
   if(selTile){o+=renderTileDetail(selTile);}
@@ -939,8 +953,8 @@ function rSec_cri(){
 
   /* Corruption totale */
   o+='<div class="card"><div class="card-t">'+L("skull")+'Corruption</div>';
-  o+=ctr("cor","Corruption totale",S.cor,0,50);
-  o+='<div style="margin-top:4px"><input value="'+esc(S.corD)+'" placeholder="Emplacements: piste \u00c9co, slot Prog 2..." style="font-size:.74rem" onchange="setv(\'corD\',this.value)"></div>';
+  o+='<div style="font-size:.62rem;color:var(--tx2);margin-bottom:6px;line-height:1.4">\u26a0\ufe0f Compte tous tes cubes corruption : pistes, programmes, secteurs, Offre. Chaque cube = \u22121 Influence \u00e0 l\u2019\u00c9valuation.</div>';
+  o+=ctr("cor","Total cubes corruption",S.cor,0,50);
   o+='</div>';
   return o;
 }
