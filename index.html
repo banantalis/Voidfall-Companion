@@ -89,26 +89,29 @@ button{font-family:var(--ft);cursor:pointer;touch-action:manipulation}
 .tgl.on-g{background:rgba(56,191,194,.2);border-color:var(--ok);color:var(--ok)}
 .tgl.on-y{background:rgba(251,191,36,.2);border-color:#fbbf24;color:#fbbf24}
 
-/* === HEX GRID (true honeycomb) === */
+/* === HEX GRID (flat-top honeycomb, like physical board) === */
 .hex-map{position:relative;margin:0 auto 14px;overflow:visible}
-.hex-wrap{position:absolute;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:rgba(58,36,104,.5)}
-.hex-wrap.hw-own{background:#3b82f6}
-.hex-wrap.hw-corr{background:#a855f7}
+.hex-wrap{position:absolute;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);background:rgba(58,36,104,.5)}
+.hex-wrap.hw-own{background:#60a5fa}
 .hex-wrap.hw-nea{background:#c86a3e}
-.hex-wrap.hw-sel{background:#60a5fa;z-index:5}
-.hex-cell{position:absolute;inset:2px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:var(--bg3);border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--fth);cursor:pointer;padding:2px;gap:0}
+.hex-wrap.hw-faille{background:#dc2626}
+.hex-wrap.hw-sel{background:#93c5fd;z-index:5}
+.hex-cell{position:absolute;inset:2px;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);background:var(--bg3);border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--fth);cursor:pointer;padding:2px;gap:0}
 .hex-cell.empty{background:#0f1a3a}
 .hex-cell.empty:active{background:#182848}
-.hex-cell.own{background:rgba(20,40,90,.95)}
-.hex-cell.own.corr{background:rgba(50,20,80,.95)}
+.hex-cell.own{background:rgba(30,58,138,.95)}
 .hex-cell.nea{background:rgba(60,30,15,.95)}
+.hex-cell.faille{background:rgba(100,10,10,.95);cursor:default}
 .hc-co{font-size:.6rem;font-weight:700;color:var(--tx2);letter-spacing:.02em;line-height:1}
 .hc-in{font-size:.9rem;font-weight:700;color:#60a5fa;line-height:1}
 .hc-sub{font-size:.5rem;font-weight:600;color:var(--tx2);line-height:1;opacity:.8}
 .hc-lbl{font-size:.55rem;font-weight:700;color:var(--ac);line-height:1;opacity:.7;letter-spacing:.02em}
 .hex-cell.own .hc-co{color:#93bbfc}
-.hex-cell.own.corr .hc-co,.hex-cell.own.corr .hc-in{color:#c084fc}
 .hex-cell.nea .hc-co,.hex-cell.nea .hc-in{color:var(--ac)}
+.hex-cell.faille .hc-co{color:#fca5a5}
+.hex-cell.faille .hc-lbl{color:#fca5a5;opacity:1;font-size:.7rem}
+/* Voidstorm bars between hexes */
+.vs-bar{position:absolute;background:linear-gradient(90deg,#b45309,#f59e0b,#b45309);border-radius:3px;height:6px;z-index:3;opacity:.85}
 
 /* === TILE DETAIL === */
 .td{background:var(--bg2);border:1px solid var(--ac2);border-radius:var(--rad);padding:14px;margin-bottom:10px}
@@ -377,30 +380,63 @@ var PROG_ALL=PROG_D.concat(PROG_M).concat(PROG_S).concat(PROG_W);
 var GRID_COLS=4,GRID_ROWS=10;
 
 /* =================================================================
-   SCENARIO HEX LAYOUTS
-   Each scenario defines valid hex positions as [col,row,label]
-   Even rows are offset right in the honeycomb.
-   Row 1 = bottom (Secteur-Mère), higher rows = north (Néant).
-   Labels: SM=Secteur-Mère, AP=Avant-Poste, F=Faille, MD=Maison Déchue
+   SCENARIO HEX LAYOUTS (flat-top, matching physical board & vfapp)
+   Coordinate system: [col, row, label]
+   Flat-top hex: odd columns offset DOWN by half a hex height.
+   Labels: SM=Secteur-Mère, F=Faille, MD=Maison Déchue
+   storms = pairs of adjacent sectors with Voidstorm barriers
+   faille = non-playable Faille hex positions (shown in red)
    ================================================================= */
 var SCENARIO_MAPS={
-/* C011 — Première Ligne (12 secteurs + SM + AP = 14 hex)
-   Diagonal: Faille en haut-droite → SM en bas-gauche */
-"C011":[[3,9,"F"],[2,8,"F"],[3,8],[2,7,"MD"],[2,6],[3,6],[2,5,"★"],[1,4],[2,4],[1,3],[1,2],[2,2],[1,1,"SM"],[2,1,"AP"]],
-/* C021 — Ultime Résistance (~15 secteurs) */
-"C021":[[2,8,"F"],[1,7,"F"],[2,7,"F"],[2,6],[3,6],[1,5],[2,5,"MD"],[3,5],[1,4],[2,4],[3,4],[1,3],[2,3],[2,2],[2,1,"SM"]],
-/* C031 — Les Heures Sombres (~17 secteurs) */
-"C031":[[2,9,"F"],[2,8],[3,8,"F"],[1,7],[2,7],[3,7],[1,6],[2,6],[3,6],[1,5],[2,5],[3,5],[1,4],[2,4],[3,4],[1,3],[2,3],[2,2,"SM"]],
-/* C041 — Secrets Anciens (~15 secteurs) */
-"C041":[[2,7,"F"],[3,7,"F"],[1,6],[2,6],[3,6],[1,5],[2,5,"MD"],[3,5],[1,4],[2,4],[3,4],[1,3],[2,3],[2,2],[2,1,"SM"]],
-/* C051 — Le Triangle du Diable (~17 secteurs) */
-"C051":[[2,9,"F"],[1,8,"F"],[2,8],[1,7],[2,7],[3,7,"F"],[1,6],[2,6],[3,6],[1,5],[2,5],[3,5],[1,4],[2,4],[1,3],[2,3],[1,2],[1,1,"SM"]],
-/* C061 — L'Obscure Clarté (~18 secteurs) */
-"C061":[[2,10],[1,9],[2,9],[2,8],[1,7],[2,7,"F"],[1,6],[2,6],[3,6],[1,5],[2,5],[1,4],[2,4],[3,4],[1,3],[2,3],[1,2],[2,2],[1,1,"SM"]],
-/* C071 — Ce Jour n'est pas Arrivé (~20 secteurs) */
-"C071":[[4,9,"F"],[3,8,"F"],[4,8],[2,7],[3,7],[4,7],[1,6],[2,6],[3,6],[4,6],[2,5],[3,5],[4,5],[1,4],[2,4],[3,4],[2,3],[3,3],[2,2],[3,2],[2,1,"SM"]],
-/* C081 — La Chute d'une Civilisation (~14 secteurs) */
-"C081":[[1,9,"F"],[2,8,"F"],[3,7,"F"],[1,6],[2,6],[3,6],[1,5],[2,5],[3,5],[1,4],[2,4],[1,3],[2,3],[1,2],[1,1,"SM"]]
+/* C011 — First Contact / Première Ligne (10 secteurs)
+   Exact layout from vfapp: 3 columns, SM at (0,2), MD at (2,3) */
+"C011":{
+  sectors:[[0,1],[0,2,"SM"],[0,3],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2],[2,3,"MD"]],
+  faille:[[3,0,"F"],[3,1,"F"]],
+  storms:[["0,1","1,0"],["1,0","2,1"],["1,1","2,1"]]
+},
+/* C021 — Last Stand / Ultime Résistance (11 secteurs) */
+"C021":{
+  sectors:[[0,1],[0,2,"SM"],[1,0],[1,1],[1,2],[2,0],[2,1,"MD"],[2,2],[2,3],[3,1],[3,2]],
+  faille:[[3,0,"F"],[4,0,"F"]],
+  storms:[["1,0","2,1"],["2,0","3,1"]]
+},
+/* C031 — Darkest Hours / Les Heures Sombres (14 secteurs) */
+"C031":{
+  sectors:[[0,1],[0,2],[0,3,"SM"],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[2,3],[3,0],[3,1],[3,2]],
+  faille:[[4,0,"F"],[4,1,"F"]],
+  storms:[["1,0","2,1"],["2,0","3,1"],["2,1","3,1"]]
+},
+/* C041 — Ancient Secrets / Secrets Anciens (11 secteurs) */
+"C041":{
+  sectors:[[0,1],[0,2,"SM"],[1,0],[1,1],[1,2],[2,0],[2,1,"MD"],[2,2],[3,0],[3,1],[3,2]],
+  faille:[[4,0,"F"],[4,1,"F"]],
+  storms:[["1,0","2,1"],["1,1","2,1"]]
+},
+/* C051 — Devil's Triangle / Le Triangle du Diable (14 secteurs) */
+"C051":{
+  sectors:[[0,1],[0,2],[0,3,"SM"],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]],
+  faille:[[3,0,"F"],[4,0,"F"],[4,1,"F"]],
+  storms:[["0,1","1,0"],["1,0","2,1"],["2,1","3,1"]]
+},
+/* C061 — Obscure Radiance / L'Obscure Clarté (14 secteurs) */
+"C061":{
+  sectors:[[0,1],[0,2],[0,3,"SM"],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[3,0],[3,1],[3,2],[3,3]],
+  faille:[[4,0,"F"],[4,1,"F"]],
+  storms:[["1,0","2,0"],["2,0","3,1"]]
+},
+/* C071 — Not Today / Ce Jour n'est pas Arrivé (16 secteurs) */
+"C071":{
+  sectors:[[0,1],[0,2,"SM"],[0,3],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[2,3],[3,0],[3,1],[3,2],[3,3],[4,1]],
+  faille:[[4,0,"F"],[5,0,"F"]],
+  storms:[["1,0","2,1"],["2,0","3,1"],["2,1","3,1"],["3,0","4,1"]]
+},
+/* C081 — Fall of Civilization / La Chute d'une Civilisation (11 secteurs) */
+"C081":{
+  sectors:[[0,1],[0,2,"SM"],[0,3],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2],[3,0],[3,1]],
+  faille:[[3,0,"F"],[4,0,"F"],[4,1,"F"]],
+  storms:[["0,1","1,0"],["1,0","2,1"],["1,1","2,1"]]
+}
 };
 
 function getScenarioKey(){
@@ -412,7 +448,17 @@ function getScenarioKey(){
 function getScenarioLayout(){
   var key=getScenarioKey();
   if(!key||!SCENARIO_MAPS[key])return null;
-  return SCENARIO_MAPS[key];
+  return SCENARIO_MAPS[key].sectors||null;
+}
+function getScenarioFaille(){
+  var key=getScenarioKey();
+  if(!key||!SCENARIO_MAPS[key])return[];
+  return SCENARIO_MAPS[key].faille||[];
+}
+function getScenarioStorms(){
+  var key=getScenarioKey();
+  if(!key||!SCENARIO_MAPS[key])return[];
+  return SCENARIO_MAPS[key].storms||[];
 }
 
 /* =================================================================
@@ -592,7 +638,7 @@ function togOPcor(i){S.oPcor[i]=!S.oPcor[i];saveState();R();}
 
 /* Tile helpers */
 function tapTile(c){
-  if(!S.tiles[c]){S.tiles[c]=newTile(true);selTile=c;saveState();}
+  if(!S.tiles[c]){S.tiles[c]=newTile(false);selTile=c;saveState();}
   else if(selTile===c){selTile=null;}
   else{selTile=c;}
   R();
@@ -601,7 +647,15 @@ function delTile(c){if(!confirm("Supprimer ("+c+") ?")){return;}delete S.tiles[c
 function tadj(c,k,d,mn,mx){var t=S.tiles[c];if(!t)return;if(mn==null)mn=0;if(mx==null)mx=999;t[k]=Math.max(mn,Math.min(mx,t[k]+d));saveState();R();}
 function ttog(c,k){var t=S.tiles[c];if(!t)return;t[k]=!t[k];saveState();R();}
 function cycG(c,k){var t=S.tiles[c];if(!t)return;t[k]=(t[k]+1)%3;saveState();R();}
-function tSetOwn(c,own){var t=S.tiles[c];if(!t)return;t.own=own;saveState();R();}
+function tSetOwn(c,own){
+  var t=S.tiles[c];if(!t)return;
+  t.own=own;
+  /* If switching to player, set defaults */
+  if(own){t.pop=t.pop||1;t.pur=true;t.cv=0;t.grd=false;t.prm=0;t.glo=0;t.lib=0;}
+  /* If switching to néant, reset player fields */
+  else{t.pop=0;t.gN=0;t.gE=0;t.gM=0;t.gC=0;t.gS=0;t.iBS=false;t.iCN=false;t.iDS=false;t.pur=true;}
+  saveState();R();
+}
 
 /* Position helpers */
 function cycCy(){S.cy=S.cy>=3?1:S.cy+1;saveState();R();}
@@ -758,63 +812,79 @@ function tctr(coord,key,label,val,mn,mx){
    HEX GRID + TILE DETAIL RENDERERS
    ================================================================= */
 function renderHexGrid(){
-  var HW=62,HH=72;
-  var HGAP=3;
-  var VSPACE=HH*0.75+2;
+  /* Flat-top hex: W > H, odd columns offset down */
+  var HW=76,HH=66;
+  var HGAP=3,VGAP=3;
+  var HSPACE=HW*0.75+HGAP;
+  var VSPACE=HH+VGAP;
 
-  /* Build positions from scenario layout ONLY */
+  /* Build positions from scenario layout */
   var layout=getScenarioLayout();
-  var positions=[];
+  var faille=getScenarioFaille();
+  var allPos=[];
   var posSet={};
 
   if(layout){
     for(var i=0;i<layout.length;i++){
       var p=layout[i];
       var c=p[0]+","+p[1];
-      positions.push({c:c,col:p[0],row:p[1],lbl:p[2]||""});
+      allPos.push({c:c,col:p[0],row:p[1],lbl:p[2]||"",isFaille:false});
       posSet[c]=true;
     }
+    for(var i=0;i<faille.length;i++){
+      var p=faille[i];
+      var c=p[0]+","+p[1];
+      allPos.push({c:c,col:p[0],row:p[1],lbl:p[2]||"F",isFaille:true});
+    }
   } else {
-    /* No scenario: show existing tiles */
     for(var k in S.tiles){if(S.tiles.hasOwnProperty(k)){
-      var pp=k.split(",");positions.push({c:k,col:parseInt(pp[0]),row:parseInt(pp[1]),lbl:""});posSet[k]=true;
+      var pp=k.split(",");allPos.push({c:k,col:parseInt(pp[0]),row:parseInt(pp[1]),lbl:"",isFaille:false});posSet[k]=true;
     }}
-    if(positions.length===0){
-      for(var r=1;r<=3;r++)for(var cc=1;cc<=3;cc++){
-        var ck=cc+","+r;positions.push({c:ck,col:cc,row:r,lbl:""});posSet[ck]=true;
+    if(allPos.length===0){
+      for(var r=0;r<=2;r++)for(var cc=0;cc<=2;cc++){
+        var ck=cc+","+r;allPos.push({c:ck,col:cc,row:r,lbl:"",isFaille:false});posSet[ck]=true;
       }
     }
   }
 
-  if(positions.length===0)return '';
+  if(allPos.length===0)return '';
 
   var minR=99,maxR=0,minC=99,maxC=0;
-  for(var i=0;i<positions.length;i++){
-    var p=positions[i];
+  for(var i=0;i<allPos.length;i++){
+    var p=allPos[i];
     if(p.row<minR)minR=p.row;if(p.row>maxR)maxR=p.row;
     if(p.col<minC)minC=p.col;if(p.col>maxC)maxC=p.col;
   }
 
   var colSpan=maxC-minC;
   var rowSpan=maxR-minR;
-  var totalW=(colSpan+1)*(HW+HGAP)+(HW+HGAP)/2+HGAP;
-  var totalH=rowSpan*VSPACE+HH+4;
+  var totalW=colSpan*HSPACE+HW+HGAP*2;
+  var totalH=rowSpan*VSPACE+HH+VSPACE/2+VGAP*2;
 
   var o='<div class="hex-map" style="height:'+totalH+'px;width:'+totalW+'px">';
 
-  for(var i=0;i<positions.length;i++){
-    var pos=positions[i];
-    var x=(pos.col-minC)*(HW+HGAP)+(pos.row%2===0?(HW+HGAP)/2:0);
-    var y=(maxR-pos.row)*VSPACE;
+  for(var i=0;i<allPos.length;i++){
+    var pos=allPos[i];
+    /* Flat-top: x based on column, odd columns shifted down by HH/2 */
+    var x=(pos.col-minC)*HSPACE;
+    var y=(pos.row-minR)*VSPACE+(pos.col%2!==0?HH/2:0);
     var t=S.tiles[pos.c];
 
+    if(pos.isFaille){
+      /* Faille hex: red, non-interactive */
+      o+='<div class="hex-wrap hw-faille" style="left:'+x+'px;top:'+y+'px;width:'+HW+'px;height:'+HH+'px">';
+      o+='<div class="hex-cell faille">';
+      o+='<span class="hc-lbl">FAILLE</span>';
+      o+='</div></div>';
+      continue;
+    }
+
     var cls="hex-cell";
-    if(t){cls+=t.own?" own":" nea";if(t.own&&!t.pur)cls+=" corr";}
+    if(t){cls+=t.own?" own":" nea";}
     else{cls+=" empty";}
 
     var wc="hex-wrap";
-    if(t&&t.own&&t.pur)wc+=" hw-own";
-    if(t&&t.own&&!t.pur)wc+=" hw-corr";
+    if(t&&t.own)wc+=" hw-own";
     if(t&&!t.own)wc+=" hw-nea";
     if(selTile===pos.c)wc+=" hw-sel";
 
@@ -833,6 +903,22 @@ function renderHexGrid(){
       o+='<span class="hc-lbl">'+pos.lbl+'</span>';
     }
     o+='</button></div>';
+  }
+
+  /* Voidstorm bars */
+  var storms=getScenarioStorms();
+  for(var s=0;s<storms.length;s++){
+    var a=storms[s][0].split(","),b=storms[s][1].split(",");
+    var ac=parseInt(a[0]),ar=parseInt(a[1]),bc=parseInt(b[0]),br=parseInt(b[1]);
+    var ax=(ac-minC)*HSPACE+HW/2;
+    var ay=(ar-minR)*VSPACE+(ac%2!==0?HH/2:0)+HH/2;
+    var bx=(bc-minC)*HSPACE+HW/2;
+    var by=(br-minR)*VSPACE+(bc%2!==0?HH/2:0)+HH/2;
+    var mx=(ax+bx)/2,my=(ay+by)/2;
+    var dx=bx-ax,dy=by-ay;
+    var len=Math.sqrt(dx*dx+dy*dy);
+    var angle=Math.atan2(dy,dx)*180/Math.PI;
+    o+='<div class="vs-bar" style="left:'+(mx-len*0.35)+'px;top:'+(my-3)+'px;width:'+(len*0.7)+'px;transform:rotate('+angle+'deg);transform-origin:center"></div>';
   }
 
   o+='</div>';
