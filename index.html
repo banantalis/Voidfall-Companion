@@ -91,25 +91,24 @@ button{font-family:var(--ft);cursor:pointer;touch-action:manipulation}
 
 /* === HEX GRID (true honeycomb) === */
 .hex-map{position:relative;margin:0 auto 14px;overflow:visible}
-.hex-wrap{position:absolute;filter:drop-shadow(0 0 1px var(--brd)) drop-shadow(0 0 1px var(--brd));transition:filter .15s}
-.hex-wrap.hw-own{filter:drop-shadow(0 0 1.5px #3b82f6) drop-shadow(0 0 1px #3b82f6)}
-.hex-wrap.hw-corr{filter:drop-shadow(0 0 1.5px #a855f7) drop-shadow(0 0 1px #a855f7)}
-.hex-wrap.hw-nea{filter:drop-shadow(0 0 1.5px var(--ac)) drop-shadow(0 0 1px var(--ac))}
-.hex-wrap.hw-sel{filter:drop-shadow(0 0 0 #60a5fa) drop-shadow(0 0 4px #60a5fa) drop-shadow(0 0 8px #60a5fa);z-index:5}
-.hex-cell{width:100%;height:100%;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:var(--bg3);border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--fth);cursor:pointer;padding:2px;gap:0}
+.hex-wrap{position:absolute;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:rgba(58,36,104,.5)}
+.hex-wrap.hw-own{background:#3b82f6}
+.hex-wrap.hw-corr{background:#a855f7}
+.hex-wrap.hw-nea{background:#c86a3e}
+.hex-wrap.hw-sel{background:#60a5fa;z-index:5}
+.hex-cell{position:absolute;inset:2px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:var(--bg3);border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--fth);cursor:pointer;padding:2px;gap:0}
 .hex-cell.empty{background:#0f1a3a}
 .hex-cell.empty:active{background:#182848}
-.hex-cell.own{background:rgba(59,130,246,.18)}
-.hex-cell.own.corr{background:rgba(168,85,247,.18)}
-.hex-cell.nea{background:rgba(232,120,78,.15)}
-.hc-co{font-size:.56rem;font-weight:700;color:var(--tx2);letter-spacing:.02em;line-height:1}
-.hc-in{font-size:.82rem;font-weight:700;color:#60a5fa;line-height:1}
-.hc-sub{font-size:.44rem;font-weight:600;color:var(--tx2);line-height:1;opacity:.7}
-.hc-lbl{font-size:.5rem;font-weight:700;color:var(--ac);line-height:1;opacity:.6;letter-spacing:.02em}
+.hex-cell.own{background:rgba(20,40,90,.95)}
+.hex-cell.own.corr{background:rgba(50,20,80,.95)}
+.hex-cell.nea{background:rgba(60,30,15,.95)}
+.hc-co{font-size:.6rem;font-weight:700;color:var(--tx2);letter-spacing:.02em;line-height:1}
+.hc-in{font-size:.9rem;font-weight:700;color:#60a5fa;line-height:1}
+.hc-sub{font-size:.5rem;font-weight:600;color:var(--tx2);line-height:1;opacity:.8}
+.hc-lbl{font-size:.55rem;font-weight:700;color:var(--ac);line-height:1;opacity:.7;letter-spacing:.02em}
 .hex-cell.own .hc-co{color:#93bbfc}
 .hex-cell.own.corr .hc-co,.hex-cell.own.corr .hc-in{color:#c084fc}
 .hex-cell.nea .hc-co,.hex-cell.nea .hc-in{color:var(--ac)}
-.hex-legend{display:flex;justify-content:space-between;font-size:.5rem;color:var(--tx2);opacity:.4;padding:4px 8px 0}
 
 /* === TILE DETAIL === */
 .td{background:var(--bg2);border:1px solid var(--ac2);border-radius:var(--rad);padding:14px;margin-bottom:10px}
@@ -759,13 +758,13 @@ function tctr(coord,key,label,val,mn,mx){
    HEX GRID + TILE DETAIL RENDERERS
    ================================================================= */
 function renderHexGrid(){
-  var HW=62,HH=72; /* hex cell width & height (pointy-top) */
-  var HGAP=3; /* gap between hexes horizontally */
-  var VSPACE=HH*0.75+2; /* vertical row spacing */
+  var HW=62,HH=72;
+  var HGAP=3;
+  var VSPACE=HH*0.75+2;
 
-  /* Build list of positions to show */
+  /* Build positions from scenario layout ONLY */
   var layout=getScenarioLayout();
-  var positions=[]; /* {c:"col,row", col, row, lbl} */
+  var positions=[];
   var posSet={};
 
   if(layout){
@@ -775,24 +774,20 @@ function renderHexGrid(){
       positions.push({c:c,col:p[0],row:p[1],lbl:p[2]||""});
       posSet[c]=true;
     }
-    /* Also add any extra tiles not in layout (backward compat) */
-    for(var k in S.tiles){if(S.tiles.hasOwnProperty(k)&&!posSet[k]){
-      var pp=k.split(",");positions.push({c:k,col:parseInt(pp[0]),row:parseInt(pp[1]),lbl:""});posSet[k]=true;
-    }}
   } else {
-    /* No scenario layout: show existing tiles + a small default grid */
+    /* No scenario: show existing tiles */
     for(var k in S.tiles){if(S.tiles.hasOwnProperty(k)){
       var pp=k.split(",");positions.push({c:k,col:parseInt(pp[0]),row:parseInt(pp[1]),lbl:""});posSet[k]=true;
     }}
-    /* Add empty spots for a 4x3 default grid if no tiles */
     if(positions.length===0){
-      for(var r=1;r<=3;r++)for(var cc=1;cc<=4;cc++){
-        var ck=cc+","+r;if(!posSet[ck]){positions.push({c:ck,col:cc,row:r,lbl:""});posSet[ck]=true;}
+      for(var r=1;r<=3;r++)for(var cc=1;cc<=3;cc++){
+        var ck=cc+","+r;positions.push({c:ck,col:cc,row:r,lbl:""});posSet[ck]=true;
       }
     }
   }
 
-  /* Find bounds */
+  if(positions.length===0)return '';
+
   var minR=99,maxR=0,minC=99,maxC=0;
   for(var i=0;i<positions.length;i++){
     var p=positions[i];
@@ -800,11 +795,10 @@ function renderHexGrid(){
     if(p.col<minC)minC=p.col;if(p.col>maxC)maxC=p.col;
   }
 
-  /* Calculate container size */
   var colSpan=maxC-minC;
   var rowSpan=maxR-minR;
   var totalW=(colSpan+1)*(HW+HGAP)+(HW+HGAP)/2+HGAP;
-  var totalH=rowSpan*VSPACE+HH+6;
+  var totalH=rowSpan*VSPACE+HH+4;
 
   var o='<div class="hex-map" style="height:'+totalH+'px;width:'+totalW+'px">';
 
@@ -814,12 +808,10 @@ function renderHexGrid(){
     var y=(maxR-pos.row)*VSPACE;
     var t=S.tiles[pos.c];
 
-    /* Cell classes */
     var cls="hex-cell";
     if(t){cls+=t.own?" own":" nea";if(t.own&&!t.pur)cls+=" corr";}
     else{cls+=" empty";}
 
-    /* Wrapper classes */
     var wc="hex-wrap";
     if(t&&t.own&&t.pur)wc+=" hw-own";
     if(t&&t.own&&!t.pur)wc+=" hw-corr";
@@ -837,17 +829,12 @@ function renderHexGrid(){
         o+='<span class="hc-in">'+(t.cv||0)+'</span>';
         o+='<span class="hc-sub">'+(t.grd?'gardien':'n\u00e9ant')+'</span>';
       }
-    } else {
-      /* Empty slot: show label if any */
-      if(pos.lbl)o+='<span class="hc-lbl">'+pos.lbl+'</span>';
+    } else if(pos.lbl){
+      o+='<span class="hc-lbl">'+pos.lbl+'</span>';
     }
     o+='</button></div>';
   }
 
-  /* Legend below the map */
-  o+='<div class="hex-legend" style="position:absolute;bottom:-16px;left:0;right:0">';
-  o+='<span>\u2191 N\u00e9ant (haut)</span><span>Secteur-M\u00e8re (bas) \u2193</span>';
-  o+='</div>';
   o+='</div>';
   return o;
 }
@@ -997,15 +984,8 @@ function rSec_prog(){
 
 function rSec_sec(){
   var o='<div class="card"><div class="card-t">'+L("hexagon")+'Secteurs</div>';
-  var layout=getScenarioLayout();
-  if(layout){
-    o+='<div style="font-size:.62rem;color:var(--tx2);margin-bottom:8px;text-align:center">Disposition '+getScenarioKey()+'. Tapez un hex pour le modifier.</div>';
-  }else{
-    o+='<div style="font-size:.62rem;color:var(--tx2);margin-bottom:8px;text-align:center">Tapez une position pour cr\u00e9er un secteur.</div>';
-  }
-  o+='<div style="padding-bottom:22px">';
   o+=renderHexGrid();
-  o+='</div></div>';
+  o+='</div>';
   if(selTile){o+=renderTileDetail(selTile);}
   return o;
 }
