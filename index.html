@@ -758,7 +758,7 @@ function newState(nm,ho,sc,di){
     tB:"",tA:"",
     tiles:{},
     crM:0,crE:0,cat:0,crP:0,grd:0,crSlots:{m:["","","",""],e:["","","",""]},crDraw:"",
-    com:0,comD:"",glo:0,gloD:"",cor:0,corD:"",
+    coms:[],glos:[],cor:0,corD:"",
     rf:[{n:0},{n:0}],
     evt:"",crC:"",
     fc:{cq:true,po:true,dv:true,pd:true,pr:true,pg:true,rf:true,tt:true,iv:false},
@@ -916,15 +916,18 @@ function migrate(){
   var houseMap={"Novarchon":"Novaris","Kh'Zeen":"Zenor","Velthari":"Valnis","Dominor":"Astoran","Fenrari":"Fenrax"};
   if(S.house&&houseMap[S.house])S.house=houseMap[S.house];
   /* Force all numeric fields to 0 if undefined/NaN */
-  var numKeys=["cy","mn","ph","inf","rN","rE","rM","rC","rS","pN","pE","pM","pC","pS","vN","vE","vM","vC","vS","cI","cA","cD","nCiv","nCor","crM","crE","cat","crP","grd","com","glo","cor","mnMax","fcMax","lS","lG","lE"];
+  var numKeys=["cy","mn","ph","inf","rN","rE","rM","rC","rS","pN","pE","pM","pC","pS","vN","vE","vM","vC","vS","cI","cA","cD","nCiv","nCor","crM","crE","cat","crP","grd","cor","mnMax","fcMax","lS","lG","lE"];
   for(var nk=0;nk<numKeys.length;nk++){var k=numKeys[nk];if(typeof S[k]!=="number"||isNaN(S[k])){if(k==="cy")S[k]=1;else if(k==="mn")S[k]=1;else if(k==="mnMax")S[k]=5;else if(k==="fcMax")S[k]=4;else if(k==="cI")S[k]=14;else S[k]=S[k]||0;}}
   if(!S.ph||typeof S.ph!=="string")S.ph="prep";
   /* Ensure boolean fields default to false */
   var boolKeys=["cS","cG","cE"];
   for(var bk=0;bk<boolKeys.length;bk++){if(S[boolKeys[bk]]===undefined)S[boolKeys[bk]]=false;}
   /* Ensure string fields default to "" */
-  var strKeys=["comD","gloD","corD","tB","tA","evt","crC","fcS","notes","origin","diff"];
+  var strKeys=["corD","tB","tA","evt","crC","fcS","notes","origin","diff"];
   for(var sk=0;sk<strKeys.length;sk++){if(S[strKeys[sk]]===undefined)S[strKeys[sk]]="";}
+  /* Migrate old com/glo single values → coms/glos arrays */
+  if(!Array.isArray(S.coms)){var _oc=typeof S.com==="number"&&S.com>0?S.com:0;S.coms=[];for(var ci=0;ci<_oc;ci++)S.coms.push(0);delete S.com;delete S.comD;}
+  if(!Array.isArray(S.glos)){var _og=typeof S.glo==="number"&&S.glo>0?S.glo:0;S.glos=[];for(var gi=0;gi<_og;gi++)S.glos.push(0);delete S.glo;delete S.gloD;}
   /* Ensure array/object fields */
   if(!Array.isArray(S.pr))S.pr=[{t:"",p:true,c:false},{t:"",p:true,c:false},{t:"",p:true,c:false},{t:"",p:true,c:false}];
   /* Force all tile numeric fields to 0 if undefined/NaN */
@@ -975,6 +978,14 @@ function tSetOwn(c,own){
 function cycCy(){S.cy=S.cy>=3?1:S.cy+1;saveState();R();}
 function cycMn(){S.mn=S.mn>=S.mnMax?1:S.mn+1;saveState();R();}
 function cycPh(){var ph=["prep","focus","eval"];var idx=ph.indexOf(S.ph);S.ph=ph[(idx+1)%3];saveState();R();}
+
+/* Commerces & Gloires array helpers */
+function addCom(){S.coms.push(0);saveState();R();}
+function rmCom(i){S.coms.splice(i,1);saveState();R();}
+function adjCom(i,d){S.coms[i]=Math.max(0,Math.min(20,(S.coms[i]||0)+d));saveState();R();}
+function addGlo(){S.glos.push(0);saveState();R();}
+function rmGlo(i){S.glos.splice(i,1);saveState();R();}
+function adjGlo(i,d){S.glos[i]=Math.max(0,Math.min(20,(S.glos[i]||0)+d));saveState();R();}
 
 /* =================================================================
    SEARCHABLE DROPDOWN (bottom sheet)
@@ -1491,10 +1502,25 @@ function rSec_foc(){
 
 function rSec_div(){
   var o='<div class="card"><div class="card-t">'+L("gem")+'Divers</div>';
-  o+=ctr("com","Commerces",S.com,0,20);
-  o+='<div style="margin-bottom:8px"><input value="'+esc(S.comD)+'" placeholder="Où ? (Programme slot 1, plateau...)" style="font-size:.74rem" onchange="setv(\'comD\',this.value)"></div>';
-  o+=ctr("glo","Gloires",S.glo,0,20);
-  o+='<div style="margin-bottom:8px"><input value="'+esc(S.gloD)+'" placeholder="Valeurs (3, 5, 2)" style="font-size:.74rem" onchange="setv(\'gloD\',this.value)"></div>';
+  /* Commerces — individual counters */
+  o+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span style="font-weight:700;font-size:.82rem">Commerces</span>';
+  o+='<button style="padding:3px 10px;border-radius:6px;border:1px solid var(--ac);background:transparent;color:var(--ac);font-size:.72rem;font-weight:700" onclick="addCom()">+ Ajouter</button></div>';
+  for(var ci=0;ci<S.coms.length;ci++){
+    o+='<div class="ctr" style="margin-bottom:4px"><div class="ctr-lb">Commerce #'+(ci+1)+'</div>';
+    o+='<div style="display:flex;align-items:center;gap:4px"><div class="ctr-ct"><button class="ctr-b" onclick="adjCom('+ci+',-1)">\u2212</button><span class="ctr-v">'+S.coms[ci]+'</span><button class="ctr-b" onclick="adjCom('+ci+',1)">+</button></div>';
+    o+='<button style="width:28px;height:28px;border-radius:6px;border:1px solid var(--err);background:transparent;color:var(--err);font-size:.7rem;display:flex;align-items:center;justify-content:center" onclick="rmCom('+ci+')">'+L("x","ic-sm")+'</button></div></div>';
+  }
+  if(S.coms.length){var _comT=0;for(var ct=0;ct<S.coms.length;ct++)_comT+=S.coms[ct];o+='<div style="font-size:.68rem;color:var(--tx2);margin-bottom:6px;text-align:right">Total : '+_comT+'</div>';}
+
+  /* Gloires — individual counters */
+  o+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;margin-top:10px"><span style="font-weight:700;font-size:.82rem">Gloires</span>';
+  o+='<button style="padding:3px 10px;border-radius:6px;border:1px solid var(--ac);background:transparent;color:var(--ac);font-size:.72rem;font-weight:700" onclick="addGlo()">+ Ajouter</button></div>';
+  for(var gi=0;gi<S.glos.length;gi++){
+    o+='<div class="ctr" style="margin-bottom:4px"><div class="ctr-lb">Gloire #'+(gi+1)+'</div>';
+    o+='<div style="display:flex;align-items:center;gap:4px"><div class="ctr-ct"><button class="ctr-b" onclick="adjGlo('+gi+',-1)">\u2212</button><span class="ctr-v">'+S.glos[gi]+'</span><button class="ctr-b" onclick="adjGlo('+gi+',1)">+</button></div>';
+    o+='<button style="width:28px;height:28px;border-radius:6px;border:1px solid var(--err);background:transparent;color:var(--err);font-size:.7rem;display:flex;align-items:center;justify-content:center" onclick="rmGlo('+gi+')">'+L("x","ic-sm")+'</button></div></div>';
+  }
+  if(S.glos.length){var _gloT=0;for(var gt=0;gt<S.glos.length;gt++)_gloT+=S.glos[gt];o+='<div style="font-size:.68rem;color:var(--tx2);margin-bottom:6px;text-align:right">Total : '+_gloT+'</div>';}
   o+='</div>';
 
   o+='<div class="card"><div class="card-t">'+L("house")+'Refuges</div>';
@@ -1690,8 +1716,10 @@ function genSave(){
   if(has("div")){
     LN.push("");
     LN.push("--- AUTRES ELEMENTS ---");
-    LN.push("Commerces: "+S.com+(S.comD?" — "+S.comD:""));
-    LN.push("Gloires: "+S.glo+(S.gloD?" — "+S.gloD:""));
+    var _comS=S.coms.length?S.coms.join(", ")+" (total: "+S.coms.reduce(function(a,b){return a+b;},0)+")":"aucun";
+    LN.push("Commerces: "+_comS);
+    var _gloS=S.glos.length?S.glos.join(", ")+" (total: "+S.glos.reduce(function(a,b){return a+b;},0)+")":"aucun";
+    LN.push("Gloires: "+_gloS);
     LN.push("Refuges: "+S.rf[0].n+"/2, "+S.rf[1].n+"/2");
     if(S.evt)LN.push("Evenement: "+S.evt);
     if(S.crC)LN.push("Crise en cours: "+S.crC);
@@ -1753,7 +1781,7 @@ function genSave(){
   LN.push("pN/pE/pM/pC/pS(niveau), vN/vE/vM/vC/vS(revenu), rN/rE/rM/rC/rS(reserves)");
   LN.push("lS/lG/lE(pistes 0-8), cS/cG/cE(corruption piste bool), cA/cI/cD(cubes)");
   LN.push("evt(str), crC(str), crDraw(str), crSlots:{m:[4 str],e:[4 str]}, cat(int)");
-  LN.push("cor(int), com(int), glo(int), rf:[{n:0-2},{n:0-2}]");
+  LN.push("cor(int), coms:[int,...], glos:[int,...], rf:[{n:0-2},{n:0-2}]");
   LN.push("oPcor:[bool,bool,bool,bool](corruption Offre: Soutien,Force,Richesse,Domination)");
   LN.push('fc:{cq:bool,...}, pr:[{t:"nom",p:bool,c:bool},...](4 slots)');
   LN.push('tiles:{"col,row":{pop,gN,gE,gM,gC,gS,iBS,iCN,iDS,pur,cv,cb,grd,prm,glo,lib,own}}');
@@ -1844,7 +1872,9 @@ function genLight(){
   if(has("div")){
     LN.push("");
     LN.push("--- DIVERS ---");
-    LN.push("Commerces: "+S.com+" | Gloires: "+S.glo+" | Refuges: "+S.rf[0].n+"/2, "+S.rf[1].n+"/2");
+    var _comS2=S.coms.length?S.coms.join("+")+("="+S.coms.reduce(function(a,b){return a+b;},0)):"0";
+    var _gloS2=S.glos.length?S.glos.join("+")+("="+S.glos.reduce(function(a,b){return a+b;},0)):"0";
+    LN.push("Commerces: "+_comS2+" | Gloires: "+_gloS2+" | Refuges: "+S.rf[0].n+"/2, "+S.rf[1].n+"/2");
     if(S.evt)LN.push("Evenement: "+S.evt);
     if(S.crC)LN.push("Crise en cours: "+S.crC);
     if(S.oP&&S.oP.length)LN.push("Offre Programmes: "+S.oP.join(", "));
