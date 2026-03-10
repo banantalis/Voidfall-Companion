@@ -7,9 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<meta name="app-version" content="2026.03.10.1">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -264,6 +262,8 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
+var APP_VERSION="2026.03.10.1";
+
 /* =================================================================
    LUCIDE ICON HELPER
    ================================================================= */
@@ -944,9 +944,8 @@ function migrate(){
     for(var ti=0;ti<tKeys.length;ti++){if(typeof _t2[tKeys[ti]]!=="number"||isNaN(_t2[tKeys[ti]]))_t2[tKeys[ti]]=0;}
     /* Migrate typ from old own boolean */
     if(!_t2.typ){_t2.typ=_t2.own?"j":"n";_t2.own=_t2.typ==="j";}
-    /* Migrate ships from old cv/cb */
-    if(!Array.isArray(_t2.ships)){_t2.ships=[];if(_t2.own&&_t2.cv>0){for(var si=0;si<_t2.cv;si++)_t2.ships.push({type:"corvette",cubes:0});}if(_t2.own)_t2.cv=0;}
-    delete _t2.cb;
+    /* Migrate ships from old cv/cb (idempotent: only adds ships array if missing, never deletes fields) */
+    if(!Array.isArray(_t2.ships)){_t2.ships=[];if(_t2.own&&_t2.cv>0){for(var si=0;si<_t2.cv;si++)_t2.ships.push({type:"corvette",cubes:0});}}
   }}
 }
 function resetSetup(){if(confirm("Modifier les infos de la partie ?")){screen="setup";tglMenu();R();}}
@@ -2379,6 +2378,28 @@ window.addEventListener("hashchange",function(){
   var hs=parseHash();
   if(hs&&hs.length&&curSaveId&&S){sel=hs;screen="input";R();}
 });
+
+/* =================================================================
+   AUTO-UPDATE CHECK — bypasses CDN cache, works on iOS Safari
+   ================================================================= */
+(function(){
+  try{
+    var delay=3000;
+    setTimeout(function(){
+      var url=location.href.split("?")[0].split("#")[0];
+      fetch(url+"?_cb="+Date.now(),{cache:"no-store"})
+        .then(function(r){return r.text();})
+        .then(function(html){
+          var m=html.match(/<meta\s+name="app-version"\s+content="([^"]+)"/);
+          if(m&&m[1]&&m[1]!==APP_VERSION){
+            console.log("[AutoUpdate] New version detected: "+m[1]+" (current: "+APP_VERSION+")");
+            location.reload(true);
+          }
+        })
+        .catch(function(){/* silently ignore fetch errors */});
+    },delay);
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
