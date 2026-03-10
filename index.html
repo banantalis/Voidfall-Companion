@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.10.4">
+<meta name="app-version" content="2026.03.10.5">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -242,7 +242,6 @@ textarea{resize:vertical;min-height:60px}
       <button class="mnu-btn" style="flex:1;border-color:var(--ac);color:var(--ac);margin:0" onclick="tglMenu();doExportLight()"><i data-lucide="upload" class="ic"></i> EXPORTER</button>
     </div>
     <button class="mnu-btn" style="border-color:var(--ac2);color:var(--ac2)" onclick="tglMenu();askExportFull()"><i data-lucide="message-square-plus" class="ic"></i> Nouvelle discussion</button>
-    <button class="mnu-btn" style="border-color:#fbbf24;color:#fbbf24" onclick="tglMenu();showBackups()"><i data-lucide="history" class="ic"></i> Restaurer un backup</button>
     <button class="mnu-btn" style="border-color:var(--err);color:var(--err)" onclick="resetSetup()"><i data-lucide="settings" class="ic"></i> Modifier la partie</button>
   </div>
   <div style="margin-top:20px;font-size:.68rem;color:var(--tx2);text-align:center;line-height:1.6">Voidfall Solo Companion v3.1<br>Companion pour l'Agent IA<br><span style="color:var(--ac)">Ermenbracht</span></div>
@@ -263,7 +262,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.10.4";
+var APP_VERSION="2026.03.10.5";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -872,35 +871,43 @@ function restoreBackup(idx){
   }catch(e){alert("Erreur: "+e.message);}
 }
 
-/* Show backup restore screen */
-function showBackups(){
-  if(!curSaveId){alert("Aucune partie ouverte.");return;}
-  screen="backups";R();
-}
-function renderBackups(){
-  var baks=listBackups(curSaveId);
-  var h='<div class="sec"><div class="sec-t">🔄 Backups automatiques</div>';
-  if(!baks.length){
-    h+='<div style="color:var(--tx2);padding:16px;text-align:center">Aucun backup disponible.<br><span style="font-size:.65rem">Les backups se créent automatiquement toutes les 5 minutes<br>et avant chaque mise à jour de l\'app.</span></div>';
-  }else{
-    h+='<div style="color:var(--tx2);font-size:.65rem;padding:4px 12px;margin-bottom:8px">'+baks.length+' backup(s) — du plus récent au plus ancien</div>';
-    for(var i=baks.length-1;i>=0;i--){
-      var b=baks[i];
-      var dt=new Date(b.ts);
-      var label=dt.toLocaleDateString("fr-CA")+" "+dt.toLocaleTimeString("fr-CA",{hour:"2-digit",minute:"2-digit"});
-      var reason=b.reason==="pre-migration"?"⚙️ Pré-migration":"💾 Auto";
-      var preview="";
-      try{var pd=JSON.parse(b.data);preview=(pd.house||"?")+" — C"+(pd.cy||"?")+"/M"+(pd.mn||"?");}catch(e){preview="?";}
-      h+='<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bd)">';
-      h+='<div style="flex:1"><div style="font-size:.72rem;font-weight:600;color:var(--tx)">'+label+'</div>';
-      h+='<div style="font-size:.62rem;color:var(--tx2)">'+reason+' — '+preview+'</div></div>';
-      h+='<button onclick="restoreBackup('+i+')" style="padding:6px 12px;border-radius:6px;border:1px solid var(--ok);background:rgba(56,191,194,.1);color:var(--ok);font-size:.65rem;font-weight:600;white-space:nowrap">Restaurer</button>';
-      h+='</div>';
+/* Find all recoverable backups across all save IDs (for when saves are empty) */
+function _findAllBaks(){
+  var results=[];
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(!k||k.indexOf("vft2_bak_")!==0)continue;
+      var baks=JSON.parse(localStorage.getItem(k));
+      if(!Array.isArray(baks)||!baks.length)continue;
+      /* Take the most recent backup from this save */
+      var latest=baks[baks.length-1];
+      var pd=JSON.parse(latest.data);
+      results.push({bakKey:k,idx:baks.length-1,ts:latest.ts,house:pd.house||"?",scenario:pd.scenario||"?"});
     }
-  }
-  h+='<div style="padding:12px;text-align:center"><button onclick="screen=\'pick\';R()" style="padding:8px 20px;border-radius:8px;border:1px solid var(--bd);background:var(--bg2);color:var(--tx);font-size:.7rem">← Retour</button></div>';
-  h+='</div>';
-  return h;
+  }catch(e){}
+  results.sort(function(a,b){return b.ts-a.ts;});
+  return results;
+}
+
+/* Recover a save from backup data (auto-recovery on saves screen) */
+function recoverFromBak(bakKey,idx){
+  try{
+    var baks=JSON.parse(localStorage.getItem(bakKey));
+    if(!baks||!baks[idx])return;
+    var data=JSON.parse(baks[idx].data);
+    var id=genSaveId();
+    curSaveId=id;
+    S=data;
+    migrate();
+    S.ts=Date.now();
+    localStorage.setItem("vft2_s_"+id,JSON.stringify(S));
+    var saves=getSaves();
+    saves.push({id:id,house:S.house||"",scenario:S.scenario||"",ts:S.ts,cy:S.cy||1,mn:S.mn||1});
+    setSavesIdx(saves);
+    screen="pick";
+    R();
+  }catch(e){alert("Erreur: "+e.message);}
 }
 
 function loadSave(id){
@@ -2308,6 +2315,20 @@ function R(){
     var saves=getSaves();
     if(saves.length===0){
       o+='<div style="text-align:center;color:var(--tx2);padding:30px 0;font-size:.88rem">Aucune partie sauvegard\u00e9e</div>';
+      /* Auto-detect backups when saves are empty — silent recovery */
+      var allBaks=_findAllBaks();
+      if(allBaks.length){
+        o+='<div style="padding:16px;margin:0 12px;border:1px solid #fbbf24;border-radius:10px;background:rgba(251,191,36,.06)">';
+        o+='<div style="color:#fbbf24;font-size:.78rem;font-weight:600;text-align:center;margin-bottom:10px">\u26a0 Parties r\u00e9cup\u00e9rables</div>';
+        for(var bi=0;bi<allBaks.length;bi++){
+          var bk=allBaks[bi];
+          o+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;'+(bi>0?'border-top:1px solid var(--bd);':'')+'">';
+          o+='<div style="font-size:.72rem;color:var(--tx)"><strong>'+esc(bk.house)+'</strong><br><span style="font-size:.62rem;color:var(--tx2)">'+esc(bk.scenario)+' \u2014 '+new Date(bk.ts).toLocaleDateString("fr-CA")+'</span></div>';
+          o+='<button onclick="recoverFromBak(\''+bk.bakKey+'\','+bk.idx+')" style="padding:5px 12px;border-radius:6px;border:1px solid var(--ok);background:rgba(56,191,194,.1);color:var(--ok);font-size:.65rem;font-weight:600">R\u00e9cup\u00e9rer</button>';
+          o+='</div>';
+        }
+        o+='</div>';
+      }
     }else{
       saves.sort(function(a,b){return(b.ts||0)-(a.ts||0);});
       for(var si=0;si<saves.length;si++){
@@ -2328,16 +2349,6 @@ function R(){
     }
     o+='<button class="big-btn" style="background:var(--ac);color:#000;margin-top:16px" onclick="newGame()">'+L("plus","ic-sm")+' Nouvelle partie</button>';
     ct.innerHTML=o;
-    initIcons();
-    return;
-  }
-
-  /* === BACKUPS SCREEN === */
-  if(screen==="backups"){
-    posBar.style.display="none";
-    botBar.style.display="none";
-    document.getElementById("hsub").textContent="Backups";
-    ct.innerHTML=renderBackups();
     initIcons();
     return;
   }
