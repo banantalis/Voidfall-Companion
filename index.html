@@ -396,39 +396,39 @@ var SCENARIO_MAPS={
    Compendium : Faille en haut, SM en bas.
    ========================================================== */
 "C011":{
+  /* First Contact / Première Ligne — 10 hexagones, 3 colonnes, 4 rangées
+     Source : vfapp.vercel.app (données exactes du bundle.js)
+     Layout visuel (flat-top hex, col 1 décalée vers le bas) :
+                    [RIFT]           ← (2,0) Faille
+               [x3,gl4,DS]          ← (1,0)
+         [x1,gl1]      [x1,gl1]     ← (0,1) (2,1)
+               [x2,gl2]             ← (1,1)
+         [OUTPOST]     [x1,gl3,DS]  ← (0,2) (2,2)
+               [x2,gl2]             ← (1,2)
+         [SM]           [MD]        ← (0,3) (2,3)  */
   sectors:[
-    [1,0,"F"],   // #1  Faille haut (3× cubes)
-    [0,1,"F"],   // #2  Faille gauche (3× cubes)
-    [2,1],       // #3  Pop, Guildes
-    [1,1,"MD"],  // #4  Maison Déchue (2× cubes)
-    [0,2],       // #5  Pop
-    [2,2],       // #6  Pop, Guildes
-    [1,2,"★"],   // #7  Gloire 2
-    [0,3],       // #8  Pop
-    [2,3],       // #9  Pop 3, Gloire 3
-    [1,3],       // #10
-    [0,4],       // #11 2× cubes
-    [2,4],       // #12 2× cubes
-    [1,4,"SM"]   // SM  Secteur-Mère (vide au départ)
+    [2,0,"F"],   // #1  Faille (Rift) : 3× Néant
+    [1,0],       // #2  3× Néant, pop 4, gloire 4, DS
+    [0,1],       // #3  1× Néant, pop 2, gloire 1
+    [2,1],       // #4  1× Néant, pop 2, gloire 1
+    [1,1],       // #5  2× Néant, pop 3, gloire 2
+    [0,2],       // #6  Avant-Poste (vide au départ)
+    [2,2],       // #7  1× Néant, pop 2, gloire 3, DS
+    [1,2],       // #8  2× Néant, pop 3, gloire 2
+    [2,3,"MD"],  // #9  Maison Déchue, gloire 1
+    [0,3,"SM"]   // SM  Secteur-Mère (Home, vide au départ)
   ],
-  storms:[["0,1","1,1"],["1,0","2,1"],["1,1","2,2"]],
+  storms:[["0,1","1,0"],["1,0","2,1"],["1,1","2,1"]],
   faille:[],
-  /* Pré-remplissage : cubes Néant, pop, gloire, installations.
-     Pop = 0 si inconnue (le joueur la règle selon la tuile physique).
-     SM laissé vide (placé à l'étape 7 de la mise en place Maison). */
   startData:{
-    "1,0":{own:false,cv:3},               // #1 Faille: 3× Néant
-    "0,1":{own:false,cv:3,iDS:true},      // #2 Faille: 3× Néant + Défense Secteur
-    "2,1":{own:false,pop:0},              // #3 Pop (valeur selon tuile)
-    "1,1":{own:false,cv:2},               // #4 MD: 2× Néant (pop fixée par carte MD)
-    "0,2":{own:false,pop:0},              // #5 Pop
-    "2,2":{own:false,pop:0},              // #6 Pop
-    "1,2":{own:false,pop:0,glo:2},        // #7 Pop + Gloire 2
-    "0,3":{own:false,pop:0},              // #8 Pop
-    "2,3":{own:false,pop:3,glo:3},        // #9 Pop 3 + Gloire 3
-    "1,3":{own:false},                    // #10 minimal
-    "0,4":{own:false,cv:2},               // #11 2× Néant
-    "2,4":{own:false,cv:2}                // #12 2× Néant
+    "2,0":{own:false,cv:3},                         // #1 Faille: 3× Néant
+    "1,0":{own:false,cv:3,pop:4,glo:4,iDS:true},    // #2 DS
+    "0,1":{own:false,cv:1,pop:2,glo:1},              // #3
+    "2,1":{own:false,cv:1,pop:2,glo:1},              // #4
+    "1,1":{own:false,cv:2,pop:3,glo:2},              // #5
+    "2,2":{own:false,cv:1,pop:2,glo:3,iDS:true},     // #7 DS
+    "1,2":{own:false,cv:2,pop:3,glo:2},              // #8
+    "2,3":{own:false,glo:1}                           // #9 MD
   }
 },
 /* ==========================================================
