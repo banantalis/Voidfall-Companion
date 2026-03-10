@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.10.2">
+<meta name="app-version" content="2026.03.10.3">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -243,6 +243,7 @@ textarea{resize:vertical;min-height:60px}
     </div>
     <button class="mnu-btn" style="border-color:var(--ac2);color:var(--ac2)" onclick="tglMenu();askExportFull()"><i data-lucide="message-square-plus" class="ic"></i> Nouvelle discussion</button>
     <button class="mnu-btn" style="border-color:#a78bfa;color:#a78bfa" onclick="tglMenu();exportSaveURL()"><i data-lucide="link" class="ic"></i> Backup (lien)</button>
+    <button class="mnu-btn" style="border-color:#fbbf24;color:#fbbf24" onclick="tglMenu();showBackups()"><i data-lucide="history" class="ic"></i> Restaurer un backup</button>
     <button class="mnu-btn" style="border-color:var(--err);color:var(--err)" onclick="resetSetup()"><i data-lucide="settings" class="ic"></i> Modifier la partie</button>
   </div>
   <div style="margin-top:20px;font-size:.68rem;color:var(--tx2);text-align:center;line-height:1.6">Voidfall Solo Companion v3.1<br>Companion pour l'Agent IA<br><span style="color:var(--ac)">Ermenbracht</span></div>
@@ -263,7 +264,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.10.2";
+var APP_VERSION="2026.03.10.3";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -812,8 +813,111 @@ function getSaves(){try{var d=localStorage.getItem(SAVES_KEY);return d?JSON.pars
 function setSavesIdx(arr){try{localStorage.setItem(SAVES_KEY,JSON.stringify(arr));}catch(e){}}
 function genSaveId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,5);}
 
+/* =================================================================
+   AUTO-BACKUP SYSTEM
+   Keeps last 10 snapshots per save. Creates backup:
+   - Before every migration (pre-migration safety net)
+   - Every 5 minutes during active play (periodic)
+   Storage: vft2_bak_{saveId} = [{ts, data, reason}]
+   ================================================================= */
+var BAK_MAX=10;
+var BAK_INTERVAL=5*60*1000; /* 5 minutes */
+var _lastBakTs=0;
+
+function _getBaks(id){
+  try{var d=localStorage.getItem("vft2_bak_"+(id||curSaveId));return d?JSON.parse(d):[];}catch(e){return[];}
+}
+function _setBaks(id,arr){
+  try{localStorage.setItem("vft2_bak_"+(id||curSaveId),JSON.stringify(arr));}catch(e){}
+}
+function _pushBak(id,rawJson,reason){
+  if(!id||!rawJson)return;
+  var baks=_getBaks(id);
+  baks.push({ts:Date.now(),data:rawJson,reason:reason||"auto"});
+  /* Keep only last BAK_MAX */
+  while(baks.length>BAK_MAX)baks.shift();
+  _setBaks(id,baks);
+}
+
+/* Called BEFORE migrate() touches the data — saves the raw JSON as-is */
+function backupBeforeMigrate(id,rawJson){
+  _pushBak(id,rawJson,"pre-migration");
+}
+
+/* Called periodically from saveState — max once per BAK_INTERVAL */
+function autoBackup(){
+  if(!S||!curSaveId)return;
+  var now=Date.now();
+  if(now-_lastBakTs<BAK_INTERVAL)return;
+  _lastBakTs=now;
+  _pushBak(curSaveId,JSON.stringify(S),"auto");
+}
+
+/* List backups for a save (for restore UI) */
+function listBackups(id){return _getBaks(id||curSaveId);}
+
+/* Restore from a specific backup index */
+function restoreBackup(idx){
+  if(!curSaveId)return;
+  var baks=_getBaks(curSaveId);
+  if(!baks[idx]){alert("Backup introuvable.");return;}
+  if(!confirm("Restaurer le backup du "+new Date(baks[idx].ts).toLocaleString("fr-CA")+" ?"))return;
+  try{
+    var data=JSON.parse(baks[idx].data);
+    S=data;
+    migrate();
+    saveState();
+    screen="pick";
+    alert("Backup restauré !");
+    R();
+  }catch(e){alert("Erreur: "+e.message);}
+}
+
+/* Show backup restore screen */
+function showBackups(){
+  if(!curSaveId){alert("Aucune partie ouverte.");return;}
+  screen="backups";R();
+}
+function renderBackups(){
+  var baks=listBackups(curSaveId);
+  var h='<div class="sec"><div class="sec-t">🔄 Backups automatiques</div>';
+  if(!baks.length){
+    h+='<div style="color:var(--tx2);padding:16px;text-align:center">Aucun backup disponible.<br><span style="font-size:.65rem">Les backups se créent automatiquement toutes les 5 minutes<br>et avant chaque mise à jour de l\'app.</span></div>';
+  }else{
+    h+='<div style="color:var(--tx2);font-size:.65rem;padding:4px 12px;margin-bottom:8px">'+baks.length+' backup(s) — du plus récent au plus ancien</div>';
+    for(var i=baks.length-1;i>=0;i--){
+      var b=baks[i];
+      var dt=new Date(b.ts);
+      var label=dt.toLocaleDateString("fr-CA")+" "+dt.toLocaleTimeString("fr-CA",{hour:"2-digit",minute:"2-digit"});
+      var reason=b.reason==="pre-migration"?"⚙️ Pré-migration":"💾 Auto";
+      var preview="";
+      try{var pd=JSON.parse(b.data);preview=(pd.house||"?")+" — C"+(pd.cy||"?")+"/M"+(pd.mn||"?");}catch(e){preview="?";}
+      h+='<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bd)">';
+      h+='<div style="flex:1"><div style="font-size:.72rem;font-weight:600;color:var(--tx)">'+label+'</div>';
+      h+='<div style="font-size:.62rem;color:var(--tx2)">'+reason+' — '+preview+'</div></div>';
+      h+='<button onclick="restoreBackup('+i+')" style="padding:6px 12px;border-radius:6px;border:1px solid var(--ok);background:rgba(56,191,194,.1);color:var(--ok);font-size:.65rem;font-weight:600;white-space:nowrap">Restaurer</button>';
+      h+='</div>';
+    }
+  }
+  h+='<div style="padding:12px;text-align:center"><button onclick="screen=\'pick\';R()" style="padding:8px 20px;border-radius:8px;border:1px solid var(--bd);background:var(--bg2);color:var(--tx);font-size:.7rem">← Retour</button></div>';
+  h+='</div>';
+  return h;
+}
+
 function loadSave(id){
-  try{var d=localStorage.getItem("vft2_s_"+id);if(d){S=JSON.parse(d);migrate();curSaveId=id;return true;}}catch(e){}return false;
+  try{
+    var d=localStorage.getItem("vft2_s_"+id);
+    if(d){
+      /* Backup raw data BEFORE migration touches it */
+      backupBeforeMigrate(id,d);
+      S=JSON.parse(d);
+      migrate();
+      curSaveId=id;
+      _lastBakTs=Date.now(); /* Don't double-backup right away */
+      return true;
+    }
+  }catch(e){}
+  return false;
 }
 
 function saveState(){
@@ -825,6 +929,8 @@ function saveState(){
     if(saves[i].id===curSaveId){saves[i].ts=S.ts;saves[i].house=S.house;saves[i].scenario=S.scenario;saves[i].cy=S.cy;saves[i].mn=S.mn;break;}
   }
   setSavesIdx(saves);
+  /* Periodic auto-backup */
+  autoBackup();
 }
 
 function createSave(){
@@ -839,6 +945,7 @@ function createSave(){
 function deleteSave(id){
   if(!confirm("Supprimer cette partie ?"))return;
   try{localStorage.removeItem("vft2_s_"+id);}catch(e){}
+  try{localStorage.removeItem("vft2_bak_"+id);}catch(e){}
   var saves=getSaves().filter(function(s){return s.id!==id;});
   setSavesIdx(saves);
   if(curSaveId===id){curSaveId=null;S=null;}
@@ -2222,6 +2329,16 @@ function R(){
     }
     o+='<button class="big-btn" style="background:var(--ac);color:#000;margin-top:16px" onclick="newGame()">'+L("plus","ic-sm")+' Nouvelle partie</button>';
     ct.innerHTML=o;
+    initIcons();
+    return;
+  }
+
+  /* === BACKUPS SCREEN === */
+  if(screen==="backups"){
+    posBar.style.display="none";
+    botBar.style.display="none";
+    document.getElementById("hsub").textContent="Backups";
+    ct.innerHTML=renderBackups();
     initIcons();
     return;
   }
