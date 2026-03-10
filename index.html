@@ -762,7 +762,7 @@ function newState(nm,ho,sc,di){
     rf:[{n:0},{n:0}],
     evt:"",crC:"",
     fc:{cq:true,po:true,dv:true,pd:true,pr:true,pg:true,rf:true,tt:true,iv:false},
-    fcS:"",oP:[],oPcor:[false,false,false,false],notes:"",ts:Date.now()
+    fcS:"",fcMax:4,oP:[],oPcor:[false,false,false,false],notes:"",ts:Date.now()
   };
 }
 
@@ -893,6 +893,7 @@ function migrate(){
   if(!Array.isArray(S.oPcor))S.oPcor=[false,false,false,false];
   while(S.oPcor.length<4)S.oPcor.push(false);
   if(!S.mnMax)S.mnMax=5;
+  if(!S.fcMax)S.fcMax=4;
   /* Revenu fields */
   if(S.vN===undefined){S.vN=0;S.vE=0;S.vM=0;S.vC=0;S.vS=0;}
   /* Crisis slots */
@@ -1493,6 +1494,7 @@ function rSec_div(){
 
   o+='<div class="card"><div class="card-t">'+L("star")+'Événement & Crises</div>';
   o+=ctr("mnMax","Manches ce cycle",S.mnMax,3,7);
+  o+=ctr("fcMax","Focus par manche",S.fcMax,1,9);
   o+='<div style="margin-bottom:8px;margin-top:8px"><label>Événement galactique (Cycle '+S.cy+')</label>';
   if(S.evt){
     o+='<button class="sdp-trig" onclick="openEvtDrop()"><span class="sdp-val">'+esc(S.evt)+'</span><span class="sdp-arr" onclick="event.stopPropagation();clearEvt()">\u2715</span></button>';
@@ -2016,11 +2018,11 @@ function renderPosBar(){
   var pb=document.getElementById("posBar");
   var phCls={prep:"on-b",focus:"on-y",eval:"on-r"}[S.ph];
   var phNm={prep:"A · Préparation",focus:"B · Focus",eval:"C · Évaluation"}[S.ph];
-  /* Focus progress: count played vs total */
+  /* Focus progress: played vs fcMax (from event card) */
   var fl=getFocus(S.house),fcTotal=0,fcInH=0;
   for(var fi=0;fi<fl.length;fi++){var ff=fl[fi];if(ff.c2&&S.cy<2)continue;fcTotal++;if(S.fc[ff.k])fcInH++;}
   var fcPlayed=fcTotal-fcInH;
-  if(S.ph==="focus")phNm+=' <span style="font-size:.7rem;opacity:.85">'+fcPlayed+'/'+fcTotal+'</span>';
+  if(S.ph==="focus")phNm+=' <span style="font-size:.7rem;opacity:.85">'+fcPlayed+'/'+S.fcMax+'</span>';
   var o='<span style="font-size:.72rem;color:var(--tx2);font-weight:600">Cycle</span>';
   o+='<span class="pos-chip on-o" onclick="cycCy()">'+S.cy+'</span>';
   o+='<span style="font-size:.72rem;color:var(--tx2);font-weight:600">Manche</span>';
