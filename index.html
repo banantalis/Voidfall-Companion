@@ -1530,7 +1530,7 @@ function rSec_div(){
   for(var ci=0;ci<S.coms.length;ci++){
     o+='<div class="ctr" style="margin-bottom:4px"><div class="ctr-lb">Commerce #'+(ci+1)+'</div>';
     o+='<div style="display:flex;align-items:center;gap:4px"><div class="ctr-ct"><button class="ctr-b" onclick="adjCom('+ci+',-1)">\u2212</button><span class="ctr-v">'+S.coms[ci]+'</span><button class="ctr-b" onclick="adjCom('+ci+',1)">+</button></div>';
-    o+='<button style="width:28px;height:28px;border-radius:6px;border:1px solid var(--err);background:transparent;color:var(--err);font-size:.7rem;display:flex;align-items:center;justify-content:center" onclick="rmCom('+ci+')">'+L("x","ic-sm")+'</button></div></div>';
+    o+='<button style="width:24px;height:24px;border-radius:6px;border:1px solid var(--err);background:transparent;color:var(--err);font-size:.6rem;display:flex;align-items:center;justify-content:center;margin-left:16px;opacity:.5" onclick="if(confirm(\'Supprimer Commerce #'+(ci+1)+' ?\'))rmCom('+ci+')">'+L("x","ic-sm")+'</button></div></div>';
   }
   if(S.coms.length){var _comT=0;for(var ct=0;ct<S.coms.length;ct++)_comT+=S.coms[ct];o+='<div style="font-size:.68rem;color:var(--tx2);margin-bottom:6px;text-align:right">Total : '+_comT+'</div>';}
 
@@ -1540,7 +1540,7 @@ function rSec_div(){
   for(var gi=0;gi<S.glos.length;gi++){
     o+='<div class="ctr" style="margin-bottom:4px"><div class="ctr-lb">Gloire #'+(gi+1)+'</div>';
     o+='<div style="display:flex;align-items:center;gap:4px"><div class="ctr-ct"><button class="ctr-b" onclick="adjGlo('+gi+',-1)">\u2212</button><span class="ctr-v">'+S.glos[gi]+'</span><button class="ctr-b" onclick="adjGlo('+gi+',1)">+</button></div>';
-    o+='<button style="width:28px;height:28px;border-radius:6px;border:1px solid var(--err);background:transparent;color:var(--err);font-size:.7rem;display:flex;align-items:center;justify-content:center" onclick="rmGlo('+gi+')">'+L("x","ic-sm")+'</button></div></div>';
+    o+='<button style="width:24px;height:24px;border-radius:6px;border:1px solid var(--err);background:transparent;color:var(--err);font-size:.6rem;display:flex;align-items:center;justify-content:center;margin-left:16px;opacity:.5" onclick="if(confirm(\'Supprimer Gloire #'+(gi+1)+' ?\'))rmGlo('+gi+')">'+L("x","ic-sm")+'</button></div></div>';
   }
   if(S.glos.length){var _gloT=0;for(var gt=0;gt<S.glos.length;gt++)_gloT+=S.glos[gt];o+='<div style="font-size:.68rem;color:var(--tx2);margin-bottom:6px;text-align:right">Total : '+_gloT+'</div>';}
   o+='</div>';
