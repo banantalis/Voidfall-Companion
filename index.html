@@ -2164,16 +2164,6 @@ function R(){
     o+='<button class="big-btn" style="flex:2;background:var(--ac);color:#000;margin:0'+(sel.length===0?";opacity:.4":"")+'" onclick="goInput()"'+(sel.length===0?" disabled":"")+'>OK — '+sel.length+' section'+(sel.length>1?"s":"")+'</button>';
     o+='</div>';
 
-    if(sel.length>0){
-      o+='<div style="font-size:.68rem;color:var(--tx2);text-align:center;margin-top:4px">'+sel.map(function(id){for(var j=0;j<SECS.length;j++){if(SECS[j].id===id)return SECS[j].nm;}return id;}).join(" · ")+'</div>';
-    }
-
-    /* IMPORTER / EXPORTER / NOUVELLE DISCUSSION — accès rapide depuis le picker */
-    o+='<div style="display:flex;gap:8px;margin-top:16px">';
-    o+='<button style="flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--ok);background:rgba(56,191,194,.06);color:var(--ok);font-size:.72rem;font-weight:700;font-family:var(--fth);display:flex;align-items:center;justify-content:center;gap:5px;letter-spacing:.02em" onclick="openAgentPaste()">'+L("download","ic-sm")+' IMPORTER</button>';
-    o+='<button style="flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--ac);background:rgba(232,120,78,.06);color:var(--ac);font-size:.72rem;font-weight:700;font-family:var(--fth);display:flex;align-items:center;justify-content:center;gap:5px;letter-spacing:.02em" id="btnExpLight" onclick="doExportLight()">'+L("upload","ic-sm")+' EXPORTER</button>';
-    o+='</div>';
-    o+='<button style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--ac2);background:rgba(178,132,255,.06);color:var(--ac2);font-size:.72rem;font-weight:700;font-family:var(--fth);display:flex;align-items:center;justify-content:center;gap:5px;letter-spacing:.02em;margin-top:8px" id="btnExpFull" onclick="askExportFull()">'+L("message-square-plus","ic-sm")+' NOUVELLE DISCUSSION</button>';
 
     ct.innerHTML=o;
     initIcons();
