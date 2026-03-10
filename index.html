@@ -758,7 +758,7 @@ function newState(nm,ho,sc,di){
     tB:"",tA:"",
     tiles:{},
     crM:0,crE:0,cat:0,crP:0,grd:0,crSlots:{m:["","","",""],e:["","","",""]},crDraw:"",
-    coms:[],glos:[],cor:0,corD:"",
+    coms:[],glos:[],
     rf:[{n:0},{n:0}],
     evt:"",crC:"",
     fc:{cq:true,po:true,dv:true,pd:true,pr:true,pg:true,rf:true,tt:true,iv:false},
@@ -916,14 +916,14 @@ function migrate(){
   var houseMap={"Novarchon":"Novaris","Kh'Zeen":"Zenor","Velthari":"Valnis","Dominor":"Astoran","Fenrari":"Fenrax"};
   if(S.house&&houseMap[S.house])S.house=houseMap[S.house];
   /* Force all numeric fields to 0 if undefined/NaN */
-  var numKeys=["cy","mn","ph","inf","rN","rE","rM","rC","rS","pN","pE","pM","pC","pS","vN","vE","vM","vC","vS","cI","cA","cD","nCiv","nCor","crM","crE","cat","crP","grd","cor","mnMax","fcMax","lS","lG","lE"];
+  var numKeys=["cy","mn","ph","inf","rN","rE","rM","rC","rS","pN","pE","pM","pC","pS","vN","vE","vM","vC","vS","cI","cA","cD","nCiv","nCor","crM","crE","cat","crP","grd","mnMax","fcMax","lS","lG","lE"];
   for(var nk=0;nk<numKeys.length;nk++){var k=numKeys[nk];if(typeof S[k]!=="number"||isNaN(S[k])){if(k==="cy")S[k]=1;else if(k==="mn")S[k]=1;else if(k==="mnMax")S[k]=5;else if(k==="fcMax")S[k]=4;else if(k==="cI")S[k]=14;else S[k]=S[k]||0;}}
   if(!S.ph||typeof S.ph!=="string")S.ph="prep";
   /* Ensure boolean fields default to false */
   var boolKeys=["cS","cG","cE"];
   for(var bk=0;bk<boolKeys.length;bk++){if(S[boolKeys[bk]]===undefined)S[boolKeys[bk]]=false;}
   /* Ensure string fields default to "" */
-  var strKeys=["corD","tB","tA","evt","crC","fcS","notes","origin","diff"];
+  var strKeys=["tB","tA","evt","crC","fcS","notes","origin","diff"];
   for(var sk=0;sk<strKeys.length;sk++){if(S[strKeys[sk]]===undefined)S[strKeys[sk]]="";}
   /* Migrate old com/glo single values → coms/glos arrays */
   if(!Array.isArray(S.coms)){var _oc=typeof S.com==="number"&&S.com>0?S.com:0;S.coms=[];for(var ci=0;ci<_oc;ci++)S.coms.push(0);delete S.com;delete S.comD;}
@@ -978,6 +978,16 @@ function tSetOwn(c,own){
 function cycCy(){S.cy=S.cy>=3?1:S.cy+1;saveState();R();}
 function cycMn(){S.mn=S.mn>=S.mnMax?1:S.mn+1;saveState();R();}
 function cycPh(){var ph=["prep","focus","eval"];var idx=ph.indexOf(S.ph);S.ph=ph[(idx+1)%3];saveState();R();}
+
+/* Auto-count corruption cubes */
+function calcCor(){
+  var n=0;
+  if(S.cS)n++;if(S.cG)n++;if(S.cE)n++;
+  for(var i=0;i<S.pr.length;i++){if(S.pr[i].c)n++;}
+  if(S.oPcor)for(var j=0;j<S.oPcor.length;j++){if(S.oPcor[j])n++;}
+  if(S.tiles)for(var c in S.tiles){var t=S.tiles[c];if(t.own&&!t.pur)n++;}
+  return n;
+}
 
 /* Commerces & Gloires array helpers */
 function addCom(){S.coms.push(0);saveState();R();}
@@ -1472,10 +1482,22 @@ function rSec_cri(){
   o+='</div>';
   if(S.cat>=3) o+='<div class="warn">'+L("skull","ic-sm")+' '+(S.cat>=4?"D\u00c9FAITE IMM\u00c9DIATE !":S.cat+"/4 Catastrophes !")+'</div>';
 
-  /* Corruption totale */
+  /* Corruption totale — auto-calculée */
+  var _cc=calcCor();
+  var _cpis=(S.cS?1:0)+(S.cG?1:0)+(S.cE?1:0);
+  var _cprg=0;for(var pi=0;pi<S.pr.length;pi++){if(S.pr[pi].c)_cprg++;}
+  var _coff=0;if(S.oPcor)for(var oi2=0;oi2<S.oPcor.length;oi2++){if(S.oPcor[oi2])_coff++;}
+  var _ctil=0;if(S.tiles)for(var ck in S.tiles){if(S.tiles[ck].own&&!S.tiles[ck].pur)_ctil++;}
   o+='<div class="card"><div class="card-t">'+L("skull")+'Corruption</div>';
-  o+='<div style="font-size:.62rem;color:var(--tx2);margin-bottom:6px;line-height:1.4">\u26a0\ufe0f Compte tous tes cubes corruption : pistes, programmes, secteurs, Offre. Chaque cube = \u22121 Influence \u00e0 l\u2019\u00c9valuation.</div>';
-  o+=ctr("cor","Total cubes corruption",S.cor,0,50);
+  o+='<div style="font-size:1.3rem;font-weight:700;text-align:center;color:'+(_cc>0?'var(--err)':'var(--ok)')+';margin:8px 0">'+_cc+' cube'+(_cc>1?'s':'')+' corruption</div>';
+  o+='<div style="font-size:.66rem;color:var(--tx2);line-height:1.6;margin-bottom:4px">';
+  if(_cpis)o+='Pistes : '+_cpis+'<br>';
+  if(_cprg)o+='Programmes : '+_cprg+'<br>';
+  if(_coff)o+='Offre : '+_coff+'<br>';
+  if(_ctil)o+='Secteurs : '+_ctil+'<br>';
+  if(_cc===0)o+='Aucune corruption \u2014 bien jou\u00e9 !';
+  o+='</div>';
+  o+='<div style="font-size:.6rem;color:var(--tx2);opacity:.7">\u22121 Influence par cube \u00e0 l\u2019\u00c9valuation = \u2212'+_cc+' Influence</div>';
   o+='</div>';
   return o;
 }
@@ -1710,7 +1732,7 @@ function genSave(){
     LN.push("Rangee MILITAIRE (rouge, haut): "+_fmtRow(S.crSlots.m));
     LN.push("Rangee ECONOMIQUE (bleu, bas): "+_fmtRow(S.crSlots.e));
     LN.push("Catastrophes: "+S.cat);
-    LN.push("Corruption totale: "+S.cor+(S.corD?" — "+S.corD:""));
+    LN.push("Corruption totale: "+calcCor()+" cubes (auto-calculé)");
   }
 
   if(has("div")){
@@ -1781,7 +1803,7 @@ function genSave(){
   LN.push("pN/pE/pM/pC/pS(niveau), vN/vE/vM/vC/vS(revenu), rN/rE/rM/rC/rS(reserves)");
   LN.push("lS/lG/lE(pistes 0-8), cS/cG/cE(corruption piste bool), cA/cI/cD(cubes)");
   LN.push("evt(str), crC(str), crDraw(str), crSlots:{m:[4 str],e:[4 str]}, cat(int)");
-  LN.push("cor(int), coms:[int,...], glos:[int,...], rf:[{n:0-2},{n:0-2}]");
+  LN.push("coms:[int,...], glos:[int,...], rf:[{n:0-2},{n:0-2}]");
   LN.push("oPcor:[bool,bool,bool,bool](corruption Offre: Soutien,Force,Richesse,Domination)");
   LN.push('fc:{cq:bool,...}, pr:[{t:"nom",p:bool,c:bool},...](4 slots)');
   LN.push('tiles:{"col,row":{pop,gN,gE,gM,gC,gS,iBS,iCN,iDS,pur,cv,cb,grd,prm,glo,lib,own}}');
@@ -1866,7 +1888,7 @@ function genLight(){
     function _fmtR(arr){var p=[];for(var i=0;i<arr.length;i++){p.push((i+1)+":"+(arr[i]||"vide"));}return p.join(" | ");}
     LN.push("Militaire: "+_fmtR(S.crSlots.m));
     LN.push("Economique: "+_fmtR(S.crSlots.e));
-    LN.push("Catastrophes: "+S.cat+" | Corruption: "+S.cor);
+    LN.push("Catastrophes: "+S.cat+" | Corruption: "+calcCor());
   }
 
   if(has("div")){
