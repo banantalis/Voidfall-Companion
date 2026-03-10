@@ -388,54 +388,119 @@ var GRID_COLS=4,GRID_ROWS=10;
    faille = non-playable Faille hex positions (shown in red)
    ================================================================= */
 var SCENARIO_MAPS={
-/* C011 — First Contact / Première Ligne (10 secteurs)
-   Exact layout from vfapp: 3 columns, SM at (0,2), MD at (2,3) */
+/* ==========================================================
+   C011 — First Contact / Première Ligne (13 hex)
+   Zigzag vertical : centre col 1, côtés cols 0 & 2.
+   Col impaire (1) décalée vers le bas = hex centré ENTRE les paires.
+   Compendium : Faille en haut, SM en bas.
+   ========================================================== */
 "C011":{
-  sectors:[[0,1],[0,2,"SM"],[0,3],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2],[2,3,"MD"]],
-  faille:[[3,0,"F"],[3,1,"F"]],
-  storms:[["0,1","1,0"],["1,0","2,1"],["1,1","2,1"]]
+  sectors:[
+    [1,0,"F"],   // [1]  Faille haut (3× cubes)
+    [0,1,"F"],   // [2]  Faille gauche (3× cubes)
+    [2,1],       // [3]  Pop 4
+    [1,1,"MD"],  // [4]  Maison Déchue (2× cubes)
+    [0,2],       // [5]  Pop 1
+    [2,2],       // [6]  Pop 1
+    [1,2,"★"],   // [7]  Gloire 2
+    [0,3],       // [8]  2× cubes
+    [2,3],       // [9]  Pop 3, Gloire 3
+    [1,3],       // [10]
+    [0,4],       // [11] 2× cubes
+    [2,4],       // [12] 2× cubes
+    [1,4,"SM"]   // SM   Secteur-Mère (vide au départ)
+  ],
+  storms:[["0,1","1,1"],["1,0","2,1"],["1,1","2,2"]],
+  faille:[]
 },
-/* C021 — Last Stand / Ultime Résistance (11 secteurs) */
+/* C021 — Ultime Résistance (15 hex) */
 "C021":{
-  sectors:[[0,1],[0,2,"SM"],[1,0],[1,1],[1,2],[2,0],[2,1,"MD"],[2,2],[2,3],[3,1],[3,2]],
-  faille:[[3,0,"F"],[4,0,"F"]],
-  storms:[["1,0","2,1"],["2,0","3,1"]]
+  sectors:[
+    [1,0,"F"],[0,1,"F"],[2,1,"F"],
+    [1,1],[0,2],[2,2],[1,2,"MD"],
+    [0,3],[2,3],[1,3],
+    [0,4],[2,4],[1,4],
+    [0,5,"SM"],[2,5]
+  ],
+  storms:[["0,1","1,1"],["1,0","2,1"]],
+  faille:[]
 },
-/* C031 — Darkest Hours / Les Heures Sombres (14 secteurs) */
+/* C031 — Les Heures Sombres (18 hex) */
 "C031":{
-  sectors:[[0,1],[0,2],[0,3,"SM"],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[2,3],[3,0],[3,1],[3,2]],
-  faille:[[4,0,"F"],[4,1,"F"]],
-  storms:[["1,0","2,1"],["2,0","3,1"],["2,1","3,1"]]
+  sectors:[
+    [1,0,"F"],[2,1,"F"],
+    [0,1],[1,1],[0,2],[2,2],[1,2],
+    [0,3],[2,3],[1,3],
+    [0,4],[2,4],[1,4],
+    [0,5],[2,5],[1,5],
+    [0,6],[1,6,"SM"]
+  ],
+  storms:[["1,0","2,1"],["0,1","1,1"]],
+  faille:[]
 },
-/* C041 — Ancient Secrets / Secrets Anciens (11 secteurs) */
+/* C041 — Secrets Anciens (15 hex) */
 "C041":{
-  sectors:[[0,1],[0,2,"SM"],[1,0],[1,1],[1,2],[2,0],[2,1,"MD"],[2,2],[3,0],[3,1],[3,2]],
-  faille:[[4,0,"F"],[4,1,"F"]],
-  storms:[["1,0","2,1"],["1,1","2,1"]]
+  sectors:[
+    [1,0,"F"],[0,1,"F"],
+    [2,1],[1,1,"MD"],[0,2],[2,2],
+    [1,2],[0,3],[2,3],[1,3],
+    [0,4],[2,4],[1,4],
+    [0,5,"SM"],[2,5]
+  ],
+  storms:[["0,1","1,1"],["1,0","2,1"]],
+  faille:[]
 },
-/* C051 — Devil's Triangle / Le Triangle du Diable (14 secteurs) */
+/* C051 — Le Triangle du Diable (18 hex) */
 "C051":{
-  sectors:[[0,1],[0,2],[0,3,"SM"],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]],
-  faille:[[3,0,"F"],[4,0,"F"],[4,1,"F"]],
-  storms:[["0,1","1,0"],["1,0","2,1"],["2,1","3,1"]]
+  sectors:[
+    [1,0,"F"],[0,1,"F"],[2,1,"F"],
+    [1,1],[0,2],[2,2],[1,2],
+    [0,3],[2,3],[1,3],
+    [0,4],[2,4],[1,4],
+    [0,5],[2,5],[1,5],
+    [0,6],[1,6,"SM"]
+  ],
+  storms:[["0,1","1,1"],["1,0","2,1"],["2,1","1,1"]],
+  faille:[]
 },
-/* C061 — Obscure Radiance / L'Obscure Clarté (14 secteurs) */
+/* C061 — L'Obscure Clarté (19 hex) */
 "C061":{
-  sectors:[[0,1],[0,2],[0,3,"SM"],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[3,0],[3,1],[3,2],[3,3]],
-  faille:[[4,0,"F"],[4,1,"F"]],
-  storms:[["1,0","2,0"],["2,0","3,1"]]
+  sectors:[
+    [1,0],[0,1],[2,1],
+    [1,1,"F"],[0,2],[2,2],[1,2],
+    [0,3],[2,3],[1,3],
+    [0,4],[2,4],[1,4],
+    [0,5],[2,5],[1,5],
+    [0,6],[2,6],[1,6,"SM"]
+  ],
+  storms:[["1,1","2,2"],["0,1","1,1"]],
+  faille:[]
 },
-/* C071 — Not Today / Ce Jour n'est pas Arrivé (16 secteurs) */
+/* C071 — Ce Jour n'est pas Arrivé (21 hex) */
 "C071":{
-  sectors:[[0,1],[0,2,"SM"],[0,3],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[2,3],[3,0],[3,1],[3,2],[3,3],[4,1]],
-  faille:[[4,0,"F"],[5,0,"F"]],
-  storms:[["1,0","2,1"],["2,0","3,1"],["2,1","3,1"],["3,0","4,1"]]
+  sectors:[
+    [1,0,"F"],[0,1,"F"],
+    [2,1],[1,1],[0,2],[2,2],[1,2],
+    [0,3],[2,3],[1,3],
+    [0,4],[2,4],[1,4],
+    [0,5],[2,5],[1,5],
+    [0,6],[2,6],[1,6],
+    [0,7],[1,7,"SM"]
+  ],
+  storms:[["0,1","1,1"],["1,0","2,1"],["1,1","2,2"]],
+  faille:[]
 },
-/* C081 — Fall of Civilization / La Chute d'une Civilisation (11 secteurs) */
+/* C081 — La Chute d'une Civilisation (16 hex) */
 "C081":{
-  sectors:[[0,1],[0,2,"SM"],[0,3],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2],[3,0],[3,1]],
-  faille:[[3,0,"F"],[4,0,"F"],[4,1,"F"]],
-  storms:[["0,1","1,0"],["1,0","2,1"],["1,1","2,1"]]
+  sectors:[
+    [1,0,"F"],[0,1,"F"],[2,1,"F"],
+    [1,1],[0,2],[2,2],[1,2],
+    [0,3],[2,3],[1,3],
+    [0,4],[2,4],[1,4],
+    [0,5],[2,5],[1,5,"SM"]
+  ],
+  storms:[["0,1","1,1"],["1,0","2,1"],["2,1","1,1"]],
+  faille:[]
 }
 };
 
@@ -820,7 +885,6 @@ function renderHexGrid(){
 
   /* Build positions from scenario layout */
   var layout=getScenarioLayout();
-  var faille=getScenarioFaille();
   var allPos=[];
   var posSet={};
 
@@ -828,13 +892,9 @@ function renderHexGrid(){
     for(var i=0;i<layout.length;i++){
       var p=layout[i];
       var c=p[0]+","+p[1];
-      allPos.push({c:c,col:p[0],row:p[1],lbl:p[2]||"",isFaille:false});
+      var lbl=p[2]||"";
+      allPos.push({c:c,col:p[0],row:p[1],lbl:lbl,isFaille:lbl==="F"});
       posSet[c]=true;
-    }
-    for(var i=0;i<faille.length;i++){
-      var p=faille[i];
-      var c=p[0]+","+p[1];
-      allPos.push({c:c,col:p[0],row:p[1],lbl:p[2]||"F",isFaille:true});
     }
   } else {
     for(var k in S.tiles){if(S.tiles.hasOwnProperty(k)){
@@ -870,22 +930,20 @@ function renderHexGrid(){
     var y=(pos.row-minR)*VSPACE+(pos.col%2!==0?HH/2:0);
     var t=S.tiles[pos.c];
 
+    var cls="hex-cell";
     if(pos.isFaille){
-      /* Faille hex: red, non-interactive */
-      o+='<div class="hex-wrap hw-faille" style="left:'+x+'px;top:'+y+'px;width:'+HW+'px;height:'+HH+'px">';
-      o+='<div class="hex-cell faille">';
-      o+='<span class="hc-lbl">FAILLE</span>';
-      o+='</div></div>';
-      continue;
+      /* Faille sector: red border, still interactive */
+      if(t){cls+=t.own?" own":" nea";}else{cls+=" faille";}
+    } else if(t){
+      cls+=t.own?" own":" nea";
+    } else {
+      cls+=" empty";
     }
 
-    var cls="hex-cell";
-    if(t){cls+=t.own?" own":" nea";}
-    else{cls+=" empty";}
-
     var wc="hex-wrap";
-    if(t&&t.own)wc+=" hw-own";
-    if(t&&!t.own)wc+=" hw-nea";
+    if(pos.isFaille&&!t)wc+=" hw-faille";
+    else if(t&&t.own)wc+=" hw-own";
+    else if(t&&!t.own)wc+=" hw-nea";
     if(selTile===pos.c)wc+=" hw-sel";
 
     o+='<div class="'+wc+'" style="left:'+x+'px;top:'+y+'px;width:'+HW+'px;height:'+HH+'px">';
