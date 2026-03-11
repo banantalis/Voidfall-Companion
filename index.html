@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.11.5">
+<meta name="app-version" content="2026.03.11.6">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -262,7 +262,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.11.5";
+var APP_VERSION="2026.03.11.6";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -2071,17 +2071,9 @@ function genSave(){
     LN.push(S.notes.trim());
   }
 
-  /* --- INSTRUCTIONS + ACCUEIL --- */
+  /* --- FIN — phrase courte, le system prompt gère le reste --- */
   LN.push("");
-  LN.push("CONSIGNES:");
-  LN.push("1. Confirme que tu as tout lu. Resume la situation en 3-4 phrases (basé sur le TRACKER, pas les notes).");
-  LN.push("2. Si les notes strategiques mentionnent un plan ou une prochaine action, dis-le.");
-  LN.push("3. Dis-moi exactement quoi faire maintenant.");
-  LN.push("4. Termine CHAQUE reponse par un bloc de mise a jour pour mon app :");
-  LN.push("%%VOIDFALL%%");
-  LN.push('{"_notes":"resume+strategie+prochaine action", ...cles qui changent}');
-  LN.push("%%END%%");
-  LN.push("Cles: cy,mn,mnMax,ph,inf,pN-pS,vN-vS,rN-rS,lS/lG/lE,cS/cG/cE,cA/cI/cD,evt,crC,crDraw,crSlots,cat,coms,glos,rf,oPcor,fc,pr,tB,tA,tiles");
+  LN.push("Voici mon etat de partie. Conseille-moi.");
   return LN.join("\n");
 }
 
