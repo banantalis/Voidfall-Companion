@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.11.4">
+<meta name="app-version" content="2026.03.11.5">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -262,7 +262,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.11.4";
+var APP_VERSION="2026.03.11.5";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -2540,7 +2540,9 @@ function R(){
   }
 
   o+='<details style="margin-top:10px"><summary style="font-size:.72rem;color:var(--tx2);cursor:pointer;padding:8px 0;display:flex;align-items:center;gap:4px">'+L("file-text","ic-sm")+' Voir l\'aperçu du bloc</summary>';
-  o+='<div class="exp-box">'+esc(genLight())+'</div></details>';
+  o+='<div class="exp-box">'+esc(genLight())+'</div>';
+  o+='<button style="width:100%;margin-top:6px;padding:8px 0;border-radius:8px;border:1px solid var(--ac1);background:rgba(168,85,247,.12);color:var(--ac1);font-size:.78rem;font-weight:600;font-family:var(--fth);display:flex;align-items:center;justify-content:center;gap:4px" onclick="fbCopy(genLight());this.textContent=\'\\u2705 Copi\\u00e9!\';setTimeout(function(){rend();},1200)">'+L("copy","ic-sm")+' Copier ce bloc</button>';
+  o+='</details>';
   o+='<div style="height:10px"></div>';
 
   ct.innerHTML=o;
