@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.10.12">
+<meta name="app-version" content="2026.03.10.13">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -262,7 +262,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.10.12";
+var APP_VERSION="2026.03.10.13";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -1959,7 +1959,12 @@ var SEC_RENDER={res:rSec_res,pis:rSec_pis,cub:rSec_cub,prog:rSec_prog,sec:rSec_s
 function genSave(){
   var LN=[];var has=function(id){return sel.indexOf(id)!==-1;};
 
-  LN.push("=== SAUVEGARDE VOIDFALL ===");
+  LN.push("Je joue a Voidfall en solo et j'utilise une app companion pour tracker ma partie.");
+  LN.push("Tu es mon Agent — tu m'aides a jouer, tu me conseilles, et tu mets a jour mon etat de jeu.");
+  LN.push("Voici l'etat complet de ma partie. Lis tout, resume ou on en est, et dis-moi quoi faire.");
+  LN.push("A la fin de CHAQUE reponse, genere un bloc %%VOIDFALL%%{json}%%END%% avec les changements (details en bas).");
+  LN.push("");
+  LN.push("=== ETAT DE LA PARTIE ===");
   LN.push("");
   LN.push("PARTIE: "+S.house+" (Origine "+S.origin+") | Scenario "+S.scenario+" | Difficulte "+S.diff);
   var phN={prep:"A · Preparation",focus:"B · Focus",eval:"C · Evaluation"}[S.ph];
@@ -2107,54 +2112,21 @@ function genSave(){
   }
 
   LN.push("");
-  LN.push("=== FIN SAUVEGARDE ===");
+  LN.push("=== FIN ETAT ===");
   LN.push("");
-  LN.push("=== INSTRUCTIONS POUR L'AGENT ===");
-  LN.push("Ce bloc a ete genere par l'app Voidfall Solo Tracker.");
-  LN.push("Tu es l'Agent Voidfall Solo Companion. Lis le bloc SAUVEGARDE ci-dessus + le JOURNAL pour avoir le contexte complet.");
-  LN.push("");
-  LN.push("SI NOUVELLE CONVERSATION: le joueur vient d'importer ce bloc pour reprendre sa partie.");
-  LN.push("1. Lis TOUT (etat + journal + derniere note Agent).");
-  LN.push("2. Resume en 2-3 lignes ou on en est.");
-  LN.push("3. REPRENDS EXACTEMENT ou l'Agent precedent s'etait arrete — execute l'action suivante decrite dans la derniere _notes.");
-  LN.push("   Exemple: si la note dit 'PROCHAINE ACTION: avance piste Societe case 4, puis...' → dis-le au joueur et continue.");
-  LN.push("4. Ne redemande PAS ce que le joueur veut faire — tu le SAIS deja grace au journal.");
-  LN.push("");
-  LN.push("A LA FIN de chaque reponse, tu DOIS generer un bloc %%VOIDFALL%%{...}%%END%%.");
-  LN.push("Le joueur copie ta reponse entiere et clique IMPORTER DEPUIS L'AGENT dans l'app.");
-  LN.push("L'app extrait le JSON et met a jour l'etat automatiquement.");
-  LN.push("");
-  LN.push("FORMAT:");
+  LN.push("=== FORMAT DE REPONSE ===");
+  LN.push("A la fin de CHAQUE reponse, genere un bloc JSON avec les changements d'etat:");
   LN.push("%%VOIDFALL%%");
-  LN.push('{');
-  LN.push('  "_notes": "(voir instructions _notes ci-dessous)",');
-  LN.push('  "cle": valeur');
-  LN.push('}');
+  LN.push('{"_notes":"RESUME: ... | STRATEGIE: ... | MENACES: ... | PROCHAINE ACTION: ...", "cle": valeur}');
   LN.push("%%END%%");
+  LN.push("Le joueur colle ta reponse dans l'app qui extrait le JSON automatiquement.");
+  LN.push("Inclus SEULEMENT les cles qui changent. _notes est OBLIGATOIRE (ajouté au journal).");
   LN.push("");
-  LN.push("CLES D'ETAT (inclure SEULEMENT ce qui a change):");
-  LN.push("cy(1-3), mn(manche), mnMax, ph(prep/focus/eval), inf(influence)");
-  LN.push("pN/pE/pM/pC/pS(niveau), vN/vE/vM/vC/vS(revenu), rN/rE/rM/rC/rS(reserves)");
-  LN.push("lS/lG/lE(pistes 0-8), cS/cG/cE(corruption piste bool), cA/cI/cD(cubes)");
-  LN.push("evt(str), crC(str), crDraw(str), crSlots:{m:[4 str],e:[4 str]}, cat(int)");
-  LN.push("coms:[int,...], glos:[int,...], rf:[{n:0-2},{n:0-2}]");
-  LN.push("oPcor:[bool,bool,bool,bool](corruption Offre: Soutien,Force,Richesse,Domination)");
-  LN.push('fc:{cq:bool,...}, pr:[{t:"nom",p:bool,c:bool},...](4 slots)');
-  LN.push('tiles:{"col,row":{typ("j"/"n"/"md"/"f"),pop,gN,gE,gM,gC,gS,iBS(n),iCN(n),iDS(n),pur,cv,grd,prm,glo,lib,ships:[{type,cubes}],mdH}}');
-  LN.push("");
-  LN.push("=== CLE _notes — OBLIGATOIRE, C'EST LE PLUS IMPORTANT ===");
-  LN.push("_notes est AJOUTE au journal (pas remplace). C'est un PROMPT DE CONTINUATION pour ton futur toi.");
-  LN.push("Ecris comme si tu briefais un agent qui n'a AUCUN souvenir de cette conversation.");
-  LN.push("");
-  LN.push("STRUCTURE OBLIGATOIRE de _notes:");
-  LN.push("RESUME: [1-2 phrases — ce qui s'est passe ce tour, decisions prises, combats resolus]");
-  LN.push("STRATEGIE: [plan convenu avec le joueur — court/moyen/long terme]");
-  LN.push("MENACES: [crises a venir, secteurs en danger, timing critique]");
-  LN.push("PROCHAINE ACTION: [EXACTEMENT ce que le joueur doit faire maintenant — sois precis!]");
-  LN.push("  Exemple bon: 'Avance ton marqueur Societe case 4. Puis pose 1 Population sur Secteur-Mere. On enchaine avec S\\'epanouir.'");
-  LN.push("  Exemple mauvais: 'On continue la partie.'");
-  LN.push("");
-  LN.push("La PROCHAINE ACTION est CRITIQUE — c'est ce qui permet a une nouvelle conversation de reprendre pile ou on etait.");
+  LN.push("Cles: cy,mn,mnMax,ph(prep/focus/eval),inf, pN/pE/pM/pC/pS(niveau), vN-vS(revenu), rN-rS(reserves),");
+  LN.push("lS/lG/lE(pistes 0-8), cS/cG/cE(corruption piste), cA/cI/cD(cubes),");
+  LN.push("evt,crC,crDraw,crSlots:{m:[4],e:[4]},cat, coms:[int],glos:[int],rf:[{n:0-2}x2],");
+  LN.push('oPcor:[4 bool], fc:{cq:bool,...}, pr:[{t,p,c}x4], tB,tA,');
+  LN.push('tiles:{"c,r":{typ,pop,gN,gE,gM,gC,gS,iBS,iCN,iDS,pur,cv,grd,prm,glo,lib,ships:[{type,cubes}],mdH}}');
   return LN.join("\n");
 }
 
