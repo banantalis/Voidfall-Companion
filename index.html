@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.11.6">
+<meta name="app-version" content="2026.03.11.7">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -262,7 +262,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.11.6";
+var APP_VERSION="2026.03.11.7";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -2237,7 +2237,7 @@ function openAgentPaste(){
     '<span style="flex:1;font-family:var(--fth);font-weight:700;color:var(--ok);font-size:.9rem;letter-spacing:.03em">'+L("download","ic")+' Importer depuis l\'Agent</span>'+
     '<button class="sdp-x" onclick="closeDrop()">\u2715</button></div>'+
     '<div style="padding:14px;flex:1;overflow-y:auto">'+
-    '<div style="font-size:.72rem;color:var(--tx2);margin-bottom:8px;line-height:1.5">Collez la r\u00e9ponse de l\u2019Agent qui contient un bloc <code style="color:var(--ok);background:var(--bg3);padding:2px 5px;border-radius:4px">%%VOIDFALL%%</code>. L\u2019app va extraire les changements et se mettre \u00e0 jour automatiquement.</div>'+
+    '<div style="font-size:.72rem;color:var(--tx2);margin-bottom:8px;line-height:1.5">Collez la r\u00e9ponse compl\u00e8te de l\u2019Agent. S\u2019il a inclus un bloc <code style="color:var(--ok);background:var(--bg3);padding:2px 5px;border-radius:4px">%%VOIDFALL%%...%%END%%</code> \u00e0 la fin, l\u2019app va extraire et appliquer les changements automatiquement.</div>'+
     '<textarea id="_agPaste" rows="6" style="width:100%;min-height:100px" placeholder="Collez ici la r\u00e9ponse de l\u2019Agent pour importer..."></textarea>'+
     '<div id="_agResult" style="display:none;margin-top:8px"></div>'+
     '<button style="width:100%;padding:14px;border-radius:10px;border:none;background:var(--ok);color:#000;font-size:.95rem;font-weight:700;font-family:var(--fth);margin-top:10px" onclick="doAgentApply()">'+L("check","ic-sm")+' Appliquer</button>'+
