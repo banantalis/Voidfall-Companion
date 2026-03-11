@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.10.11">
+<meta name="app-version" content="2026.03.10.12">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -262,7 +262,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.10.11";
+var APP_VERSION="2026.03.10.12";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -1662,9 +1662,13 @@ function renderTileDetail(c){
     }
   }
 
+  /* --- Bouton retour carte --- */
+  o+='<button onclick="closeTile()" style="width:100%;margin-top:12px;padding:10px 0;border-radius:8px;border:1px solid var(--ac2);background:rgba(56,191,194,.08);color:var(--ac2);font-size:.78rem;font-weight:700;font-family:var(--fth);display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:.03em">'+L("arrow-up","ic-sm")+' Retour \u00e0 la carte</button>';
+
   o+='</div>';
   return o;
 }
+function closeTile(){selTile=null;R();var el=document.getElementById("hexCard");if(el)el.scrollIntoView({behavior:"smooth",block:"start"});}
 
 /* =================================================================
    SECTION RENDERERS
@@ -1752,7 +1756,7 @@ function rSec_prog(){
 }
 
 function rSec_sec(){
-  var o='<div class="card"><div class="card-t">'+L("hexagon")+'Secteurs</div>';
+  var o='<div class="card" id="hexCard"><div class="card-t">'+L("hexagon")+'Secteurs</div>';
   o+=renderHexGrid();
   o+='</div>';
   if(selTile){o+=renderTileDetail(selTile);}
