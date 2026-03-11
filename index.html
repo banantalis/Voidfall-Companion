@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.10.14">
+<meta name="app-version" content="2026.03.11.1">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -262,7 +262,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.10.14";
+var APP_VERSION="2026.03.11.1";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -1958,181 +1958,118 @@ var SEC_RENDER={res:rSec_res,pis:rSec_pis,cub:rSec_cub,prog:rSec_prog,sec:rSec_s
    ================================================================= */
 function genSave(){
   var LN=[];var has=function(id){return sel.indexOf(id)!==-1;};
+  /* Helper: compact resource string N:5 E:3 M:7 C:0 S:5 */
+  function _res5(a,b,c,d,e){return "N:"+a+" E:"+b+" M:"+c+" C:"+d+" S:"+e;}
 
-  LN.push("Bonjour ! Je joue a Voidfall (jeu de plateau solo, 4X spatial) et j'utilise une app companion pour tracker ma partie.");
-  LN.push("");
-  LN.push("J'ai besoin de toi comme conseiller strategique. Voici l'etat complet de ma partie — lis tout, fais un resume de la situation, et dis-moi quoi faire ensuite.");
-  LN.push("");
-  LN.push("IMPORTANT : A la fin de CHAQUE reponse, tu DOIS generer un bloc de mise a jour pour mon app :");
-  LN.push("%%VOIDFALL%%");
-  LN.push('{"_notes":"ton resume ici", "cle":"valeur"}');
-  LN.push("%%END%%");
-  LN.push("(Le format detaille est a la fin de ce message.)");
-  LN.push("");
-  LN.push("=== ETAT DE LA PARTIE ===");
-  LN.push("");
-  LN.push("PARTIE: "+S.house+" (Origine "+S.origin+") | Scenario "+S.scenario+" | Difficulte "+S.diff);
-  var phN={prep:"A · Preparation",focus:"B · Focus",eval:"C · Evaluation"}[S.ph];
-  LN.push("POSITION: Cycle "+S.cy+" | Manche "+S.mn+"/"+S.mnMax+" | Phase "+phN+" | Influence: ~"+S.inf);
+  /* --- INTRO (2 lines) --- */
+  LN.push("Voidfall solo — je joue "+S.house+" (Origine "+S.origin+"), scenario "+S.scenario+", difficulte "+S.diff+". Conseille-moi.");
+  var phN={prep:"Prep",focus:"Focus",eval:"Eval"}[S.ph];
+  LN.push("Cycle "+S.cy+" Manche "+S.mn+"/"+S.mnMax+" Phase "+phN+" | Influence ~"+S.inf);
 
+  /* --- RESOURCES (3 lines) --- */
   if(has("res")){
-    LN.push("");
-    LN.push("--- NIVEAU (roulette gauche, cote gauche) ---");
-    LN.push("Nourriture(vert): "+S.pN+" | Energie(jaune): "+S.pE+" | Materiel(rose): "+S.pM+" | Credits(brun): "+S.pC+" | Science(bleu): "+S.pS);
-    LN.push("");
-    LN.push("--- REVENU (roulette gauche, cote droit) ---");
-    LN.push("Nourriture(vert): "+S.vN+" | Energie(jaune): "+S.vE+" | Materiel(rose): "+S.vM+" | Credits(brun): "+S.vC+" | Science(bleu): "+S.vS);
-    LN.push("");
-    LN.push("--- RESERVES (roulette droite, stock en main) ---");
-    LN.push("Nourriture(vert): "+S.rN+" | Energie(jaune): "+S.rE+" | Materiel(rose): "+S.rM+" | Credits(brun): "+S.rC+" | Science(bleu): "+S.rS);
+    LN.push("Niveau: "+_res5(S.pN,S.pE,S.pM,S.pC,S.pS)+" | Revenu: "+_res5(S.vN,S.vE,S.vM,S.vC,S.vS));
+    LN.push("Reserves: "+_res5(S.rN,S.rE,S.rM,S.rC,S.rS));
   }
 
-  if(has("pis")||has("cub")||has("prog")){
-    LN.push("");
-    LN.push("--- FICHE MAISON (ton plateau personnel) ---");
-  }
+  /* --- FICHE MAISON (compact) --- */
   if(has("pis")){
-    LN.push("PISTES (a gauche, de haut en bas):");
-    LN.push("  Societe (haut): case "+S.lS+" [Corruption: "+(S.cS?"oui":"non")+"]");
-    LN.push("  Gouvernement (milieu): case "+S.lG+" [Corruption: "+(S.cG?"oui":"non")+"]");
-    LN.push("  Economie (bas): case "+S.lE+" [Corruption: "+(S.cE?"oui":"non")+"]");
+    LN.push("Pistes: Societe="+S.lS+(S.cS?"(corr)":"")+" Gouv="+S.lG+(S.cG?"(corr)":"")+" Eco="+S.lE+(S.cE?"(corr)":""));
   }
   if(has("cub")){
-    LN.push("CUBES (14 total):");
-    LN.push("  Actifs (zone claire au centre): "+S.cA);
-    LN.push("  Inactifs (zone sombre au centre): "+S.cI);
-    LN.push("  Deployes (sur le plateau): "+S.cD);
+    LN.push("Cubes: "+S.cA+" actifs, "+S.cI+" inactifs, "+S.cD+" deployes ("+( S.cA+S.cI+S.cD)+"/14)");
   }
   if(has("prog")){
-    LN.push("PROGRAMMES (en bas de ta fiche, de gauche a droite):");
-    for(var i=0;i<4;i++){
-      var p=S.pr[i];
-      var sl="  Slot "+(i+1)+(i===0?" (depart)":"")+": ";
-      sl+=p.t?(p.t+" | "+(p.p?"Pur":"Corrompu")+" | Commerce: "+(p.c?"oui":"non")):"vide";
-      LN.push(sl);
-    }
-    LN.push("TECHNOLOGIES:");
-    LN.push("  Base: "+(S.tB||"aucune"));
-    LN.push("  Ameliorees: "+(S.tA||"aucune"));
+    var _pr=[];
+    for(var i=0;i<4;i++){var p=S.pr[i];_pr.push((i+1)+"="+(p.t?(p.t+(p.p?"":" CORR")+(p.c?" com":"")):"vide"));}
+    LN.push("Prog: "+_pr.join(" | "));
+    LN.push("Tech: "+(S.tB||"-")+(S.tA?" | Amel: "+S.tA:""));
   }
 
+  /* --- SECTEURS (compact, skip empty tiles) --- */
   if(has("sec")){
-    LN.push("");
-    LN.push("--- SECTEURS ---");
     var coords=Object.keys(S.tiles).sort();
     var _byTyp={j:[],n:[],md:[],f:[]};
     for(var i=0;i<coords.length;i++){var cc=coords[i];var tt=S.tiles[cc];var _tp=tt.typ||"n";if(!_byTyp[_tp])_byTyp[_tp]=[];_byTyp[_tp].push({c:cc,t:tt});}
-    /* Helper: guilds + installations string */
-    function _tileInfo(t,tp){
-      var guilds=[];
-      for(var gg=0;gg<GUILDS.length;gg++){var gl=GUILDS[gg];if(t[gl.k]>0)guilds.push(t[gl.k]+"x "+gl.nm);}
-      var inst=[];
-      if(t.iBS)inst.push((t.iBS>1?t.iBS+"×":"")+"BS");if(t.iCN)inst.push((t.iCN>1?t.iCN+"×":"")+"CN");if(t.iDS)inst.push((t.iDS>1?t.iDS+"×":"")+"DS");
-      var ln="Pop "+t.pop;
-      ln+=" | Guildes: "+(guilds.length?guilds.join(", "):"aucune");
-      ln+=" | Install: "+(inst.length?inst.join(", "):"aucune");
-      if(t.glo)ln+=" | Gloire: "+t.glo;
-      return ln;
+    function _cTile(t){
+      var p=[];
+      if(t.pop)p.push("pop"+t.pop);
+      for(var gg=0;gg<GUILDS.length;gg++){var gl=GUILDS[gg];if(t[gl.k]>0)p.push(t[gl.k]+gl.nm.charAt(0));}
+      if(t.iBS)p.push((t.iBS>1?t.iBS+"x":"")+"BS");if(t.iCN)p.push((t.iCN>1?t.iCN+"x":"")+"CN");if(t.iDS)p.push((t.iDS>1?t.iDS+"x":"")+"DS");
+      if(t.glo)p.push("glo"+t.glo);
+      return p.join(" ");
     }
     if(_byTyp.j.length){
-      LN.push("SECTEURS JOUEUR:");
+      LN.push("-- Joueur --");
       for(var i=0;i<_byTyp.j.length;i++){
         var s=_byTyp.j[i],t=s.t;
-        var ln="("+s.c+"): "+_tileInfo(t,"j")+" | "+(t.pur?"Pur":"Corrompu");
-        if(t.ships&&t.ships.length){var sh=[];for(var si=0;si<t.ships.length;si++){sh.push(t.ships[si].type+"("+t.ships[si].cubes+"c)");}ln+=" | Flotte: "+sh.join(", ");}
+        var ln="("+s.c+") "+_cTile(t)+(t.pur?"":" CORR");
+        if(t.ships&&t.ships.length){var sh=[];for(var si=0;si<t.ships.length;si++){sh.push(t.ships[si].type+"("+t.ships[si].cubes+"c)");}ln+=" ["+sh.join(",")+"]";}
         LN.push(ln);
       }
-    }else{LN.push("Aucun secteur controle");}
+    }
     if(_byTyp.n.length){
-      LN.push("");LN.push("SECTEURS NEANT:");
+      LN.push("-- Neant --");
       for(var i=0;i<_byTyp.n.length;i++){
         var s=_byTyp.n[i],t=s.t;
-        var ln="("+s.c+"): "+t.cv+" cubes Neant | "+_tileInfo(t,"n");
-        if(t.grd)ln+=" | Gardien";if(t.prm)ln+=" | Prime:"+t.prm;if(t.lib)ln+=" | Lib:"+t.lib;
-        LN.push(ln);
+        var p=[];if(t.cv)p.push(t.cv+"cv");
+        var ti=_cTile(t);if(ti)p.push(ti);
+        if(t.grd)p.push("gardien");if(t.prm)p.push("prime"+t.prm);if(t.lib)p.push("lib"+t.lib);
+        if(p.length)LN.push("("+s.c+") "+p.join(" "));
+        else LN.push("("+s.c+") vide");
       }
     }
     if(_byTyp.md.length){
-      LN.push("");LN.push("MAISONS DECHUES:");
+      LN.push("-- MD --");
       for(var i=0;i<_byTyp.md.length;i++){
         var s=_byTyp.md[i],t=s.t;
-        LN.push("("+s.c+")"+(t.mdH?" ["+t.mdH+"]":"")+": "+_tileInfo(t,"md")+" | Corrompu");
+        LN.push("("+s.c+")"+(t.mdH?" "+t.mdH:"")+" "+_cTile(t));
       }
     }
     if(_byTyp.f.length){
-      LN.push("");LN.push("FAILLES:");
-      for(var i=0;i<_byTyp.f.length;i++){
-        var s=_byTyp.f[i],t=s.t;
-        LN.push("("+s.c+"): "+t.cv+" cubes Neant");
-      }
+      LN.push("-- Failles --");
+      for(var i=0;i<_byTyp.f.length;i++){var s=_byTyp.f[i];LN.push("("+s.c+") "+s.t.cv+"cv");}
     }
   }
 
+  /* --- CRISE + DIVERS (compact) --- */
   if(has("cri")){
-    LN.push("");
-    LN.push("--- PLATEAU CRISE ---");
-    if(S.crDraw)LN.push("Crise pigee ce tour (non placee): "+S.crDraw);
-    function _fmtRow(arr){var p=[];for(var i=0;i<arr.length;i++){p.push((i+1)+":"+(arr[i]||"vide"));}return p.join(" | ");}
-    LN.push("Rangee MILITAIRE (rouge, haut): "+_fmtRow(S.crSlots.m));
-    LN.push("Rangee ECONOMIQUE (bleu, bas): "+_fmtRow(S.crSlots.e));
-    LN.push("Catastrophes: "+S.cat);
-    LN.push("Corruption totale: "+calcCor()+" cubes (auto-calculé)");
+    function _fR(arr){var p=[];for(var i=0;i<arr.length;i++){if(arr[i])p.push((i+1)+":"+arr[i]);}return p.length?p.join(","):"vide";}
+    LN.push("Crise mil=["+_fR(S.crSlots.m)+"] eco=["+_fR(S.crSlots.e)+"] cat:"+S.cat+" corr:"+calcCor());
+    if(S.crDraw)LN.push("Crise pigee: "+S.crDraw);
   }
 
   if(has("div")){
-    LN.push("");
-    LN.push("--- AUTRES ELEMENTS ---");
-    var _comS=S.coms.length?S.coms.join(", ")+" (total: "+S.coms.reduce(function(a,b){return a+b;},0)+")":"aucun";
-    LN.push("Commerces: "+_comS);
-    var _gloS=S.glos.length?S.glos.join(", ")+" (total: "+S.glos.reduce(function(a,b){return a+b;},0)+")":"aucun";
-    LN.push("Gloires: "+_gloS);
-    LN.push("Refuges: "+S.rf[0].n+"/2, "+S.rf[1].n+"/2");
-    if(S.evt)LN.push("Evenement: "+S.evt);
-    if(S.crC)LN.push("Crise en cours: "+S.crC);
-    if(S.oP&&S.oP.length)LN.push("Offre Programmes: "+S.oP.join(", "));
-    var _opNm=["Soutien","Force","Richesse","Domination"];
-    var _opCorr=[];for(var oi=0;oi<4;oi++){if(S.oPcor&&S.oPcor[oi])_opCorr.push(_opNm[oi]);}
-    if(_opCorr.length)LN.push("Corruption Offre Programmes: "+_opCorr.join(", "));
+    var _bits=[];
+    var _comT=S.coms.reduce(function(a,b){return a+b;},0);if(_comT)_bits.push("com:"+_comT);
+    var _gloT=S.glos.reduce(function(a,b){return a+b;},0);if(_gloT)_bits.push("glo:"+_gloT);
+    _bits.push("refuges:"+S.rf[0].n+"/2,"+S.rf[1].n+"/2");
+    if(S.evt)_bits.push("evt:"+S.evt);
+    if(S.crC)_bits.push("crise:"+S.crC);
+    LN.push(_bits.join(" | "));
+    if(S.oP&&S.oP.length){
+      var _opNm=["Soutien","Force","Richesse","Domination"];
+      var _opCorr=[];for(var oi=0;oi<4;oi++){if(S.oPcor&&S.oPcor[oi])_opCorr.push(_opNm[oi]);}
+      LN.push("Offre: "+S.oP.join(", ")+(_opCorr.length?" (corr: "+_opCorr.join(",")+")":""));
+    }
   }
 
+  /* --- FOCUS --- */
   if(has("foc")){
-    LN.push("");
-    LN.push("--- MAIN DE FOCUS ("+S.house+") ---");
     var fl=getFocus(S.house);
     var fIn=[],fOut=[];
-    for(var k=0;k<fl.length;k++){
-      var f=fl[k];
-      if(f.c2&&S.cy<2)continue;
-      (S.fc[f.k]?fIn:fOut).push(f.nm);
-    }
-    LN.push("En main ("+fIn.length+"): "+(fIn.join(", ")||"aucun"));
-    LN.push("Defausses: "+(fOut.join(", ")||"aucun"));
-    if(S.fcS)LN.push("Conjoint/heroique: "+S.fcS);
+    for(var k=0;k<fl.length;k++){var f=fl[k];if(f.c2&&S.cy<2)continue;(S.fc[f.k]?fIn:fOut).push(f.nm);}
+    LN.push("Focus en main: "+fIn.join(", ")+(fOut.length?" | Def: "+fOut.join(", "):""));
+    if(S.fcS)LN.push("Special: "+S.fcS);
   }
 
-  if(S.notes){
-    LN.push("");
-    LN.push("--- JOURNAL DE PARTIE ---");
-    LN.push("(Notes des sessions precedentes. En cas de contradiction avec les valeurs ci-dessus, les VALEURS CI-DESSUS sont correctes.)");
-    LN.push(S.notes);
-  }
-
+  /* --- INSTRUCTIONS (minimal — Claude comprend le jeu) --- */
   LN.push("");
-  LN.push("=== FIN ETAT ===");
-  LN.push("");
-  LN.push("=== FORMAT DE MISE A JOUR ===");
-  LN.push("A la fin de CHAQUE reponse, genere ce bloc pour que mon app tracker se mette a jour automatiquement :");
+  LN.push("Resume la situation, dis-moi quoi faire, et termine par un bloc de maj pour mon app :");
   LN.push("%%VOIDFALL%%");
-  LN.push('{"_notes":"RESUME: ... | STRATEGIE: ... | MENACES: ...", "cle": valeur, ...}');
+  LN.push('{"_notes":"resume+strategie", ...cles changees}');
   LN.push("%%END%%");
-  LN.push("");
-  LN.push("Regles : inclus SEULEMENT les cles qui changent. _notes est OBLIGATOIRE (ajoute au journal).");
-  LN.push("Cles disponibles : cy, mn, mnMax, ph(prep/focus/eval), inf,");
-  LN.push("pN/pE/pM/pC/pS (niveau), vN-vS (revenu), rN-rS (reserves),");
-  LN.push("lS/lG/lE (pistes 0-8), cS/cG/cE (corruption piste bool), cA/cI/cD (cubes),");
-  LN.push("evt, crC, crDraw, crSlots:{m:[4],e:[4]}, cat, coms:[int], glos:[int], rf:[{n:0-2}x2],");
-  LN.push('oPcor:[4 bool], fc:{cle:bool}, pr:[{t,p,c}x4], tB, tA,');
-  LN.push('tiles:{"c,r":{typ,pop,gN,gE,gM,gC,gS,iBS,iCN,iDS,pur,cv,grd,prm,glo,lib,ships:[{type,cubes}],mdH}}');
+  LN.push("Cles: cy,mn,mnMax,ph,inf,pN-pS,vN-vS,rN-rS,lS/lG/lE,cS/cG/cE,cA/cI/cD,evt,crC,crDraw,crSlots,cat,coms,glos,rf,oPcor,fc,pr,tB,tA,tiles");
   return LN.join("\n");
 }
 
