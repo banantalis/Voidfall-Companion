@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.10.13">
+<meta name="app-version" content="2026.03.10.14">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -262,7 +262,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.10.13";
+var APP_VERSION="2026.03.10.14";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -1959,10 +1959,15 @@ var SEC_RENDER={res:rSec_res,pis:rSec_pis,cub:rSec_cub,prog:rSec_prog,sec:rSec_s
 function genSave(){
   var LN=[];var has=function(id){return sel.indexOf(id)!==-1;};
 
-  LN.push("Je joue a Voidfall en solo et j'utilise une app companion pour tracker ma partie.");
-  LN.push("Tu es mon Agent — tu m'aides a jouer, tu me conseilles, et tu mets a jour mon etat de jeu.");
-  LN.push("Voici l'etat complet de ma partie. Lis tout, resume ou on en est, et dis-moi quoi faire.");
-  LN.push("A la fin de CHAQUE reponse, genere un bloc %%VOIDFALL%%{json}%%END%% avec les changements (details en bas).");
+  LN.push("Bonjour ! Je joue a Voidfall (jeu de plateau solo, 4X spatial) et j'utilise une app companion pour tracker ma partie.");
+  LN.push("");
+  LN.push("J'ai besoin de toi comme conseiller strategique. Voici l'etat complet de ma partie — lis tout, fais un resume de la situation, et dis-moi quoi faire ensuite.");
+  LN.push("");
+  LN.push("IMPORTANT : A la fin de CHAQUE reponse, tu DOIS generer un bloc de mise a jour pour mon app :");
+  LN.push("%%VOIDFALL%%");
+  LN.push('{"_notes":"ton resume ici", "cle":"valeur"}');
+  LN.push("%%END%%");
+  LN.push("(Le format detaille est a la fin de ce message.)");
   LN.push("");
   LN.push("=== ETAT DE LA PARTIE ===");
   LN.push("");
@@ -2107,25 +2112,26 @@ function genSave(){
 
   if(S.notes){
     LN.push("");
-    LN.push("--- JOURNAL DE PARTIE (notes horodatees) ---");
+    LN.push("--- JOURNAL DE PARTIE ---");
+    LN.push("(Notes des sessions precedentes. En cas de contradiction avec les valeurs ci-dessus, les VALEURS CI-DESSUS sont correctes.)");
     LN.push(S.notes);
   }
 
   LN.push("");
   LN.push("=== FIN ETAT ===");
   LN.push("");
-  LN.push("=== FORMAT DE REPONSE ===");
-  LN.push("A la fin de CHAQUE reponse, genere un bloc JSON avec les changements d'etat:");
+  LN.push("=== FORMAT DE MISE A JOUR ===");
+  LN.push("A la fin de CHAQUE reponse, genere ce bloc pour que mon app tracker se mette a jour automatiquement :");
   LN.push("%%VOIDFALL%%");
-  LN.push('{"_notes":"RESUME: ... | STRATEGIE: ... | MENACES: ... | PROCHAINE ACTION: ...", "cle": valeur}');
+  LN.push('{"_notes":"RESUME: ... | STRATEGIE: ... | MENACES: ...", "cle": valeur, ...}');
   LN.push("%%END%%");
-  LN.push("Le joueur colle ta reponse dans l'app qui extrait le JSON automatiquement.");
-  LN.push("Inclus SEULEMENT les cles qui changent. _notes est OBLIGATOIRE (ajouté au journal).");
   LN.push("");
-  LN.push("Cles: cy,mn,mnMax,ph(prep/focus/eval),inf, pN/pE/pM/pC/pS(niveau), vN-vS(revenu), rN-rS(reserves),");
-  LN.push("lS/lG/lE(pistes 0-8), cS/cG/cE(corruption piste), cA/cI/cD(cubes),");
-  LN.push("evt,crC,crDraw,crSlots:{m:[4],e:[4]},cat, coms:[int],glos:[int],rf:[{n:0-2}x2],");
-  LN.push('oPcor:[4 bool], fc:{cq:bool,...}, pr:[{t,p,c}x4], tB,tA,');
+  LN.push("Regles : inclus SEULEMENT les cles qui changent. _notes est OBLIGATOIRE (ajoute au journal).");
+  LN.push("Cles disponibles : cy, mn, mnMax, ph(prep/focus/eval), inf,");
+  LN.push("pN/pE/pM/pC/pS (niveau), vN-vS (revenu), rN-rS (reserves),");
+  LN.push("lS/lG/lE (pistes 0-8), cS/cG/cE (corruption piste bool), cA/cI/cD (cubes),");
+  LN.push("evt, crC, crDraw, crSlots:{m:[4],e:[4]}, cat, coms:[int], glos:[int], rf:[{n:0-2}x2],");
+  LN.push('oPcor:[4 bool], fc:{cle:bool}, pr:[{t,p,c}x4], tB, tA,');
   LN.push('tiles:{"c,r":{typ,pop,gN,gE,gM,gC,gS,iBS,iCN,iDS,pur,cv,grd,prm,glo,lib,ships:[{type,cubes}],mdH}}');
   return LN.join("\n");
 }
@@ -2252,11 +2258,13 @@ function askExportFull(){
   var ov=document.createElement("div");
   ov.id="_expFullOv";
   ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
+  var hasJournal=S.notes&&S.notes.length>50;
+  var journalWarn=hasJournal?'<div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:8px;padding:10px;margin-bottom:12px;font-size:.72rem;color:#fbbf24;line-height:1.4;text-align:left">'+L("alert-triangle","ic-sm")+' Le journal contient des notes de sessions pr\u00e9c\u00e9dentes. Pour \u00e9viter les contradictions, <strong>vide le journal</strong> dans la section Notes avant d\u2019exporter.</div>':"";
   ov.innerHTML='<div style="background:var(--bg2);border:1.5px solid var(--ac);border-radius:14px;padding:22px;max-width:360px;width:100%;text-align:center">'+
     '<div style="font-family:var(--fth);font-size:1rem;font-weight:700;color:var(--ac);margin-bottom:10px">'+L("alert-triangle","ic")+' Nouvelle Discussion</div>'+
-    '<div style="font-size:.78rem;color:var(--tx);line-height:1.5;margin-bottom:18px">Ceci g\u00e9n\u00e8re le <strong>m\u00e9ga-prompt complet</strong> pour d\u00e9marrer une nouvelle conversation avec l\u2019Agent.<br><br>'+
-    '\u00c0 coller au <strong>d\u00e9but</strong> d\u2019un nouveau chat. Pas mid-conversation.<br><br>'+
-    'Continuer ?</div>'+
+    '<div style="font-size:.78rem;color:var(--tx);line-height:1.5;margin-bottom:12px">Ceci copie un <strong>prompt complet</strong> \u00e0 coller dans une <strong>nouvelle conversation</strong> Claude.<br><br>'+
+    'L\u2019Agent comprendra le contexte automatiquement.</div>'+
+    journalWarn+
     '<div style="display:flex;gap:10px">'+
     '<button onclick="closeExpFullOv()" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--tx2);background:transparent;color:var(--tx2);font-size:.82rem;font-weight:700;font-family:var(--fth)">Annuler</button>'+
     '<button onclick="doExportFull()" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--ac);color:#000;font-size:.82rem;font-weight:700;font-family:var(--fth)">Oui, exporter</button>'+
