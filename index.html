@@ -2625,9 +2625,9 @@ function R(){
     if(fn) o+=fn();
   }
 
-  o+='<details style="margin-top:10px"><summary style="font-size:.72rem;color:var(--tx2);cursor:pointer;padding:8px 0;display:flex;align-items:center;gap:4px">'+L("file-text","ic-sm")+' Voir l\'aperçu du bloc</summary>';
+  o+='<button style="width:100%;margin-top:10px;padding:8px 0;border-radius:8px;border:1px solid var(--ac1);background:rgba(168,85,247,.12);color:var(--ac1);font-size:.78rem;font-weight:600;font-family:var(--fth);display:flex;align-items:center;justify-content:center;gap:4px" onclick="fbCopy(genLight());this.textContent=\'\\u2705 Copi\\u00e9!\';setTimeout(function(){rend();},1200)">'+L("copy","ic-sm")+' Copier ce bloc</button>';
+  o+='<details style="margin-top:6px"><summary style="font-size:.72rem;color:var(--tx2);cursor:pointer;padding:8px 0;display:flex;align-items:center;gap:4px">'+L("file-text","ic-sm")+' Voir l\'aperçu du bloc</summary>';
   o+='<div class="exp-box">'+esc(genLight())+'</div>';
-  o+='<button style="width:100%;margin-top:6px;padding:8px 0;border-radius:8px;border:1px solid var(--ac1);background:rgba(168,85,247,.12);color:var(--ac1);font-size:.78rem;font-weight:600;font-family:var(--fth);display:flex;align-items:center;justify-content:center;gap:4px" onclick="fbCopy(genLight());this.textContent=\'\\u2705 Copi\\u00e9!\';setTimeout(function(){rend();},1200)">'+L("copy","ic-sm")+' Copier ce bloc</button>';
   o+='</details>';
   o+='<div style="height:10px"></div>';
 
