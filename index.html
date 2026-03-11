@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.11.8">
+<meta name="app-version" content="2026.03.11.9">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -262,7 +262,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.11.8";
+var APP_VERSION="2026.03.11.9";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -1947,8 +1947,8 @@ function addNote(){
 function appendAgentNotes(txt){
   if(!txt)return;
   var ts=new Date().toLocaleString("fr-CA",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
-  var entry="["+ts+" \u2014 Agent] "+txt;
-  S.notes=S.notes?(S.notes+"\n"+entry):entry;
+  /* Replace notes entirely — agent save is a checkpoint, not a log */
+  S.notes="["+ts+" \u2014 Agent] "+txt;
 }
 
 var SEC_RENDER={res:rSec_res,pis:rSec_pis,cub:rSec_cub,prog:rSec_prog,sec:rSec_sec,cri:rSec_cri,foc:rSec_foc,div:rSec_div,not:rSec_not};
@@ -2271,7 +2271,7 @@ function doAgentApply(){
   try{var upd=JSON.parse(raw);}
   catch(e){_agMsg(res,"err","JSON invalide: "+e.message);return;}
 
-  /* Extract special _notes (append, don't replace) */
+  /* Extract special _notes (replaces existing notes — checkpoint, not log) */
   var agentNotes=upd._notes||null;
   delete upd._notes;
 
