@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.12.2">
+<meta name="app-version" content="2026.03.12.3">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -268,7 +268,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.12.2";
+var APP_VERSION="2026.03.12.3";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -2717,7 +2717,10 @@ window.addEventListener("hashchange",function(){
    ================================================================= */
 (function(){
   try{
-    var delay=3000;
+    /* Guard: only attempt ONE auto-reload per session to prevent loops */
+    var SK="_vf_updchk";
+    if(sessionStorage.getItem(SK))return;
+    sessionStorage.setItem(SK,"1");
     setTimeout(function(){
       var url=location.href.split("?")[0].split("#")[0];
       fetch(url+"?_cb="+Date.now(),{cache:"no-store"})
@@ -2729,8 +2732,8 @@ window.addEventListener("hashchange",function(){
             location.reload(true);
           }
         })
-        .catch(function(){/* silently ignore fetch errors */});
-    },delay);
+        .catch(function(){});
+    },3000);
   }catch(e){}
 })();
 </script>
