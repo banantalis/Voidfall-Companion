@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Voidfall">
 <meta name="theme-color" content="#0c0714">
-<meta name="app-version" content="2026.03.12.3">
+<meta name="app-version" content="2026.03.12.4">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -268,7 +268,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.12.3";
+var APP_VERSION="2026.03.12.4";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -1319,7 +1319,7 @@ function setShipType(c,i,v){var t=S.tiles[c];if(!t||!t.ships||!t.ships[i])return
 function calcCor(){
   var n=0;
   if(S.cS)n++;if(S.cG)n++;if(S.cE)n++;
-  for(var i=0;i<S.pr.length;i++){if(S.pr[i].c)n++;}
+  for(var i=0;i<S.pr.length;i++){if(S.pr[i].t&&!S.pr[i].p)n++;}
   if(S.oPcor)for(var j=0;j<S.oPcor.length;j++){if(S.oPcor[j])n++;}
   if(S.tiles)for(var c in S.tiles){var t=S.tiles[c];if((t.typ==="j"&&!t.pur)||(t.typ==="s"&&t.ter==="md"))n++;}
   return n;
@@ -1900,7 +1900,7 @@ function rSec_cri(){
   /* Corruption totale — auto-calculée */
   var _cc=calcCor();
   var _cpis=(S.cS?1:0)+(S.cG?1:0)+(S.cE?1:0);
-  var _cprg=0;for(var pi=0;pi<S.pr.length;pi++){if(S.pr[pi].c)_cprg++;}
+  var _cprg=0;for(var pi=0;pi<S.pr.length;pi++){if(S.pr[pi].t&&!S.pr[pi].p)_cprg++;}
   var _coff=0;if(S.oPcor)for(var oi2=0;oi2<S.oPcor.length;oi2++){if(S.oPcor[oi2])_coff++;}
   var _ctil=0;if(S.tiles)for(var ck in S.tiles){var _tt=S.tiles[ck];if((_tt.typ==="j"&&!_tt.pur)||(_tt.typ==="s"&&_tt.ter==="md"))_ctil++;}
   o+='<div class="card"><div class="card-t">'+L("skull")+'Corruption</div>';
@@ -2133,6 +2133,16 @@ function genSave(){
     function _fR(arr){var p=[];for(var i=0;i<arr.length;i++){if(arr[i])p.push((i+1)+":"+arr[i]);}return p.length?p.join(","):"vide";}
     LN.push("Crise mil=["+_fR(S.crSlots.m)+"] eco=["+_fR(S.crSlots.e)+"] cat:"+S.cat+" corr:"+calcCor());
     if(S.crDraw)LN.push("Crise pigee: "+S.crDraw);
+    /* Corruption breakdown — explicit locations */
+    var _cc=calcCor();
+    if(_cc>0){
+      var _cloc=[];
+      if(S.cS)_cloc.push("Piste Societe");if(S.cG)_cloc.push("Piste Gouvernement");if(S.cE)_cloc.push("Piste Economie");
+      for(var pi=0;pi<S.pr.length;pi++){if(S.pr[pi].t&&!S.pr[pi].p)_cloc.push("Programme "+(pi+1)+" ("+S.pr[pi].t+")");}
+      if(S.oPcor){var _opN2=["R1-Soutien","R2-Force","R3-Richesse","R4-Domination"];for(var oi2=0;oi2<4;oi2++){if(S.oPcor[oi2])_cloc.push("Offre "+_opN2[oi2]);}}
+      if(S.tiles){for(var ck in S.tiles){var _ct=S.tiles[ck];if(_ct.typ==="j"&&!_ct.pur)_cloc.push("Secteur "+ck);if(_ct.typ==="s"&&_ct.ter==="md")_cloc.push("Secteur "+ck+" (MD)");}}
+      LN.push("Corruption ("+_cc+"): "+_cloc.join(", "));
+    }
   }
 
   if(has("div")){
