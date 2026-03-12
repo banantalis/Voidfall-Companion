@@ -1442,7 +1442,9 @@ function clearCrDraw(){S.crDraw="";saveState();R();}
 /* =================================================================
    MENU
    ================================================================= */
+var _mnuLock=0;
 function tglMenu(){
+  var now=Date.now();if(now-_mnuLock<350)return;_mnuLock=now;
   var mnu=document.getElementById("mnu");
   var btn=document.getElementById("menuBtn");
   mnu.classList.toggle("show");
