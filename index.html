@@ -1190,6 +1190,8 @@ function migrate(){
   /* Ensure boolean fields default to false */
   var boolKeys=["cS","cG","cE"];
   for(var bk=0;bk<boolKeys.length;bk++){if(S[boolKeys[bk]]===undefined)S[boolKeys[bk]]=false;}
+  /* Ensure _convNum exists */
+  if(typeof S._convNum!=="number")S._convNum=0;
   /* Ensure string fields default to "" */
   var strKeys=["tB","tA","evt","crC","fcS","notes","origin","diff"];
   for(var sk=0;sk<strKeys.length;sk++){if(S[strKeys[sk]]===undefined)S[strKeys[sk]]="";}
@@ -2047,6 +2049,8 @@ function genSave(){
   /* Helper: compact resource string N:5 E:3 M:7 C:0 S:5 */
   function _res5(a,b,c,d,e){return "N:"+a+" E:"+b+" M:"+c+" C:"+d+" S:"+e;}
 
+  /* --- CONVERSATION NAME (if _convNum set) --- */
+  if(S._convNum>0){LN.push("Nom de cette conversation : v"+S._convNum+" - Partie 1 solo "+S.house);LN.push("");}
   /* --- INTRO (2 lines) --- */
   LN.push("Voidfall solo — je joue "+S.house+" (Origine "+S.origin+"), scenario "+S.scenario+", difficulte "+S.diff+". Conseille-moi.");
   var phN={prep:"Prep",focus:"Focus",eval:"Eval"}[S.ph];
@@ -2288,19 +2292,27 @@ function askExportFull(){
   ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
   var hasJournal=S.notes&&S.notes.length>50;
   var journalWarn=hasJournal?'<div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:8px;padding:10px;margin-bottom:12px;font-size:.72rem;color:#fbbf24;line-height:1.4;text-align:left">'+L("alert-triangle","ic-sm")+' Le journal contient des notes de sessions pr\u00e9c\u00e9dentes. Pour \u00e9viter les contradictions, <strong>vide le journal</strong> dans la section Notes avant d\u2019exporter.</div>':"";
+  var nextV=(S._convNum||0)+1;
   ov.innerHTML='<div style="background:var(--bg2);border:1.5px solid var(--ac);border-radius:14px;padding:22px;max-width:360px;width:100%;text-align:center">'+
     '<div style="font-family:var(--fth);font-size:1rem;font-weight:700;color:var(--ac);margin-bottom:10px">'+L("alert-triangle","ic")+' Nouvelle Discussion</div>'+
     '<div style="font-size:.78rem;color:var(--tx);line-height:1.5;margin-bottom:12px">Ceci copie un <strong>prompt complet</strong> \u00e0 coller dans une <strong>nouvelle conversation</strong> Claude.<br><br>'+
     'L\u2019Agent comprendra le contexte automatiquement.</div>'+
+    '<div style="margin-bottom:12px;text-align:left"><label style="font-size:.72rem;color:var(--tx2);display:block;margin-bottom:4px">Num\u00e9ro de conversation (v...)</label>'+
+    '<input id="_convNumIn" type="number" min="1" value="'+nextV+'" style="width:100%;padding:10px;border-radius:8px;border:1.5px solid var(--ac2);background:var(--bg3);color:var(--tx);font-size:1rem;font-weight:700;font-family:var(--fth);text-align:center"></div>'+
+    '<div style="font-size:.68rem;color:var(--tx2);margin-bottom:12px;background:var(--bg3);border-radius:8px;padding:8px;text-align:left" id="_convNamePreview">v'+nextV+' - Partie 1 solo '+S.house+'</div>'+
     journalWarn+
     '<div style="display:flex;gap:10px">'+
     '<button onclick="closeExpFullOv()" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--tx2);background:transparent;color:var(--tx2);font-size:.82rem;font-weight:700;font-family:var(--fth)">Annuler</button>'+
     '<button onclick="doExportFull()" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--ac);color:#000;font-size:.82rem;font-weight:700;font-family:var(--fth)">Oui, exporter</button>'+
     '</div></div>';
+  setTimeout(function(){var inp=document.getElementById("_convNumIn");if(inp)inp.addEventListener("input",function(){var pv=document.getElementById("_convNamePreview");if(pv)pv.textContent="v"+inp.value+" - Partie 1 solo "+S.house;});},50);
   document.body.appendChild(ov);
 }
 function closeExpFullOv(){var el=document.getElementById("_expFullOv");if(el)el.remove();}
 function doExportFull(){
+  var inp=document.getElementById("_convNumIn");
+  var vNum=inp?parseInt(inp.value)||1:1;
+  S._convNum=vNum;save();
   closeExpFullOv();
   var oldSel=sel.slice();
   sel=SECS.map(function(s){return s.id;});
