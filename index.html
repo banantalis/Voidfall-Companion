@@ -268,7 +268,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.13.3";
+var APP_VERSION="2026.03.13.4";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -1922,7 +1922,7 @@ function rSec_cri(){
   var _cdets=[];
   if(S.cS)_cdets.push('Piste Soci\u00e9t\u00e9');if(S.cG)_cdets.push('Piste Gouvernement');if(S.cE)_cdets.push('Piste \u00c9conomie');
   for(var pi=0;pi<S.pr.length;pi++){if(S.pr[pi].t&&!S.pr[pi].p)_cdets.push('Programme '+(pi+1)+' ('+esc(S.pr[pi].t)+')');}
-  if(S.oPcor){var _onU=["Soutien","Force","Richesse","Domination"];for(var oi2=0;oi2<4;oi2++){if(S.oPcor[oi2])_cdets.push('Offre '+_onU[oi2]);}}
+  if(S.oPcor){var _onU=["Soutien","Force","Richesse","Domination"];for(var oi2=0;oi2<4;oi2++){if(S.oPcor[oi2])_cdets.push('Emplacement Programme '+_onU[oi2]);}}
   if(S.tiles)for(var ck in S.tiles){var _tt=S.tiles[ck];if(_tt.typ==="j"&&!_tt.pur)_cdets.push(_tileRole(ck)+' ('+ck+')');if(_tt.typ==="s"&&_tt.ter==="md"&&_tt.own)_cdets.push(_tileRole(ck)+' ('+ck+')');}
   o+='<div class="card"><div class="card-t">'+L("skull")+'Corruption</div>';
   o+='<div style="font-size:1.3rem;font-weight:700;text-align:center;color:'+(_cc>0?'var(--err)':'var(--ok)')+';margin:8px 0">'+_cc+' cube'+(_cc>1?'s':'')+' corruption</div>';
@@ -2083,7 +2083,7 @@ function genSave(){
     var _cl0=[];
     if(S.cS)_cl0.push("Piste Societe");if(S.cG)_cl0.push("Piste Gouvernement");if(S.cE)_cl0.push("Piste Economie");
     for(var _pi0=0;_pi0<S.pr.length;_pi0++){if(S.pr[_pi0].t&&!S.pr[_pi0].p)_cl0.push("Programme "+(_pi0+1)+" ("+S.pr[_pi0].t+")");}
-    if(S.oPcor){var _on0=["R1-Soutien","R2-Force","R3-Richesse","R4-Domination"];for(var _oi0=0;_oi0<4;_oi0++){if(S.oPcor[_oi0])_cl0.push("Offre "+_on0[_oi0]);}}
+    if(S.oPcor){var _on0=["R1-Soutien","R2-Force","R3-Richesse","R4-Domination"];for(var _oi0=0;_oi0<4;_oi0++){if(S.oPcor[_oi0])_cl0.push("Emplacement Programme "+_on0[_oi0]);}}
     if(S.tiles){for(var _ck0 in S.tiles){var _ct0=S.tiles[_ck0];if(_ct0.typ==="j"&&!_ct0.pur)_cl0.push(_tileRole(_ck0)+" ("+_ck0+")");if(_ct0.typ==="s"&&_ct0.ter==="md"&&_ct0.own)_cl0.push(_tileRole(_ck0)+" ("+_ck0+", permanent)");}}
     LN.push("Corruption ("+_cc0+"): "+_cl0.join(", "));
   }else{LN.push("Corruption: 0");}
@@ -2177,7 +2177,7 @@ function genSave(){
     if(S.oP&&S.oP.length){
       var _opNm=["Soutien","Force","Richesse","Domination"];
       var _opCorr=[];for(var oi=0;oi<4;oi++){if(S.oPcor&&S.oPcor[oi])_opCorr.push(_opNm[oi]);}
-      LN.push("Offre: "+S.oP.join(", ")+(_opCorr.length?" (corr: "+_opCorr.join(",")+")":""));
+      LN.push("Emplacements Programme: "+S.oP.join(", ")+(_opCorr.length?" (corrompus: "+_opCorr.join(", ")+")":""));
     }
   }
 
@@ -2283,10 +2283,10 @@ function genLight(){
     LN.push("Commerces: "+_comS2+" | Gloires: "+_gloS2+" | Refuges: "+S.rf[0].n+"/2, "+S.rf[1].n+"/2");
     if(S.evt)LN.push("Evenement: "+S.evt);
     if(S.crC)LN.push("Crise en cours: "+S.crC);
-    if(S.oP&&S.oP.length)LN.push("Offre Programmes: "+S.oP.join(", "));
+    if(S.oP&&S.oP.length)LN.push("Emplacements Programme: "+S.oP.join(", "));
     var _opNm=["Soutien","Force","Richesse","Domination"];
     var _opCorr=[];for(var oi=0;oi<4;oi++){if(S.oPcor&&S.oPcor[oi])_opCorr.push(_opNm[oi]);}
-    if(_opCorr.length)LN.push("Corruption Offre: "+_opCorr.join(", "));
+    if(_opCorr.length)LN.push("Corruption sur emplacements Programme: "+_opCorr.join(", "));
   }
 
   if(has("foc")){
