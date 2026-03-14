@@ -268,7 +268,7 @@ textarea{resize:vertical;min-height:60px}
 
 
 <script>
-var APP_VERSION="2026.03.13.4";
+var APP_VERSION="2026.03.14.1";
 
 /* =================================================================
    LUCIDE ICON HELPER
@@ -1314,6 +1314,13 @@ function _tileRole(c){
   if(!S._roles)S._roles=buildTileRoles();
   return S._roles[c]||("Secteur "+c);
 }
+/* Cartesian display: (0,0)=bottom-left, Y up */
+function _maxRow(){
+  var layout=getScenarioLayout();if(!layout)return 0;
+  var mx=0;for(var i=0;i<layout.length;i++)if(layout[i][1]>mx)mx=layout[i][1];
+  return mx;
+}
+function dispC(c){var p=c.split(",");return p[0]+","+(_maxRow()-parseInt(p[1]));}
 var TERRAIN_FIELDS={
   faille:{cv:1,iDS:1,glo:1},
   md:{pop:1,guilds:1,iBS:1,iCN:1,iDS:1,glo:1,maison:1,corrompu:1},
@@ -1559,7 +1566,7 @@ function renderHexGrid(){
   for(var i=0;i<allPos.length;i++){
     var pos=allPos[i];
     var x=(pos.col-minC)*HSPACE;
-    var y=(pos.row-minR)*VSPACE+(pos.col%2!==0?HH/2:0);
+    var y=(maxR-pos.row)*VSPACE+(pos.col%2!==0?HH/2:0);
     var t=S.tiles[pos.c];
     var sd=scenSD[pos.c]; /* scenario default data as fallback */
 
@@ -1586,7 +1593,7 @@ function renderHexGrid(){
 
     o+='<div class="'+wc+'" style="left:'+x+'px;top:'+y+'px;width:'+HW+'px;height:'+HH+'px">';
     o+='<button class="'+cls+'" onclick="tapTile(\''+pos.c+'\')">';
-    var topTxt=pos.secNum||pos.c;
+    var topTxt=pos.secNum||dispC(pos.c);
     o+='<span class="hc-co">'+topTxt+'</span>';
     if(t){
       if(tp==="j"){
@@ -1643,9 +1650,9 @@ function renderHexGrid(){
     var a=storms[s][0].split(","),b=storms[s][1].split(",");
     var ac=parseInt(a[0]),ar=parseInt(a[1]),bc=parseInt(b[0]),br=parseInt(b[1]);
     var ax=(ac-minC)*HSPACE+HW/2;
-    var ay=(ar-minR)*VSPACE+(ac%2!==0?HH/2:0)+HH/2;
+    var ay=(maxR-ar)*VSPACE+(ac%2!==0?HH/2:0)+HH/2;
     var bx=(bc-minC)*HSPACE+HW/2;
-    var by=(br-minR)*VSPACE+(bc%2!==0?HH/2:0)+HH/2;
+    var by=(maxR-br)*VSPACE+(bc%2!==0?HH/2:0)+HH/2;
     /* midpoint of shared edge */
     var mx=(ax+bx)/2,my=(ay+by)/2;
     /* perpendicular direction (the edge runs perpendicular to center-center) */
@@ -1669,7 +1676,7 @@ function renderTileDetail(c){
   /* Header: coord + 3-way segmented control + delete */
   var ter=t.ter||"";
   o+='<div class="td-hdr">';
-  o+='<span class="td-coord">'+L("hexagon","ic")+' ('+c+')</span>';
+  o+='<span class="td-coord">'+L("hexagon","ic")+' ('+dispC(c)+')</span>';
   o+='<button class="td-del" onclick="delTile(\''+c+'\')">'+L("trash-2","ic-sm")+'</button>';
   o+='</div>';
   o+='<div class="td-seg" style="margin-bottom:10px;width:100%">';
@@ -1923,7 +1930,7 @@ function rSec_cri(){
   if(S.cS)_cdets.push('Piste Soci\u00e9t\u00e9');if(S.cG)_cdets.push('Piste Gouvernement');if(S.cE)_cdets.push('Piste \u00c9conomie');
   for(var pi=0;pi<S.pr.length;pi++){if(S.pr[pi].t&&!S.pr[pi].p)_cdets.push('Programme '+(pi+1)+' ('+esc(S.pr[pi].t)+')');}
   if(S.oPcor){var _onU=["Soutien","Force","Richesse","Domination"];for(var oi2=0;oi2<4;oi2++){if(S.oPcor[oi2])_cdets.push('Emplacement Programme '+_onU[oi2]);}}
-  if(S.tiles)for(var ck in S.tiles){var _tt=S.tiles[ck];if(_tt.typ==="j"&&!_tt.pur)_cdets.push(_tileRole(ck)+' ('+ck+')');if(_tt.typ==="s"&&_tt.ter==="md"&&_tt.own)_cdets.push(_tileRole(ck)+' ('+ck+')');}
+  if(S.tiles)for(var ck in S.tiles){var _tt=S.tiles[ck];if(_tt.typ==="j"&&!_tt.pur)_cdets.push(_tileRole(ck)+' ('+dispC(ck)+')');if(_tt.typ==="s"&&_tt.ter==="md"&&_tt.own)_cdets.push(_tileRole(ck)+' ('+dispC(ck)+')');}
   o+='<div class="card"><div class="card-t">'+L("skull")+'Corruption</div>';
   o+='<div style="font-size:1.3rem;font-weight:700;text-align:center;color:'+(_cc>0?'var(--err)':'var(--ok)')+';margin:8px 0">'+_cc+' cube'+(_cc>1?'s':'')+' corruption</div>';
   o+='<div style="font-size:.66rem;color:var(--tx2);line-height:1.6;margin-bottom:4px">';
@@ -2084,7 +2091,7 @@ function genSave(){
     if(S.cS)_cl0.push("Piste Societe");if(S.cG)_cl0.push("Piste Gouvernement");if(S.cE)_cl0.push("Piste Economie");
     for(var _pi0=0;_pi0<S.pr.length;_pi0++){if(S.pr[_pi0].t&&!S.pr[_pi0].p)_cl0.push("Programme "+(_pi0+1)+" ("+S.pr[_pi0].t+")");}
     if(S.oPcor){var _on0=["R1-Soutien","R2-Force","R3-Richesse","R4-Domination"];for(var _oi0=0;_oi0<4;_oi0++){if(S.oPcor[_oi0])_cl0.push("Emplacement Programme "+_on0[_oi0]);}}
-    if(S.tiles){for(var _ck0 in S.tiles){var _ct0=S.tiles[_ck0];if(_ct0.typ==="j"&&!_ct0.pur)_cl0.push(_tileRole(_ck0)+" ("+_ck0+")");if(_ct0.typ==="s"&&_ct0.ter==="md"&&_ct0.own)_cl0.push(_tileRole(_ck0)+" ("+_ck0+", permanent)");}}
+    if(S.tiles){for(var _ck0 in S.tiles){var _ct0=S.tiles[_ck0];if(_ct0.typ==="j"&&!_ct0.pur)_cl0.push(_tileRole(_ck0)+" ("+dispC(_ck0)+")");if(_ct0.typ==="s"&&_ct0.ter==="md"&&_ct0.own)_cl0.push(_tileRole(_ck0)+" ("+dispC(_ck0)+", permanent)");}}
     LN.push("Corruption ("+_cc0+"): "+_cl0.join(", "));
   }else{LN.push("Corruption: 0");}
 
@@ -2125,7 +2132,7 @@ function genSave(){
       LN.push("-- Secteurs Joueur --");
       for(var i=0;i<_byTyp.j.length;i++){
         var s=_byTyp.j[i],t=s.t;
-        var ln="("+s.c+") "+_tileRole(s.c)+" | "+_cTile(t)+" | "+(t.pur?"Pur":"Corrompu");
+        var ln="("+dispC(s.c)+") "+_tileRole(s.c)+" | "+_cTile(t)+" | "+(t.pur?"Pur":"Corrompu");
         if(t.ships&&t.ships.length){var sh=[];for(var si=0;si<t.ships.length;si++){sh.push(t.ships[si].type+"("+t.ships[si].cubes+"c)");}ln+=" | Flotte: "+sh.join(",");}
         LN.push(ln);
       }
@@ -2138,7 +2145,7 @@ function genSave(){
         var ti=_cTile(t);if(ti)p.push(ti);
         if(t.grd)p.push("gardien");if(t.prm)p.push("prime"+t.prm);if(t.lib)p.push("lib"+t.lib);
         p.push("Corrompu");
-        if(p.length)LN.push("("+s.c+") "+_tileRole(s.c)+" | "+p.join(" | "));
+        if(p.length)LN.push("("+dispC(s.c)+") "+_tileRole(s.c)+" | "+p.join(" | "));
       }
     }
     if(_byTyp.s.length){
@@ -2153,7 +2160,7 @@ function genSave(){
         else if(t.ter==="faille")p.push("Corrompu");
         else p.push(t.pur===false?"Corrompu":"Pur");
         if(t.grd)p.push("gardien");if(t.prm)p.push("prime"+t.prm);if(t.lib)p.push("lib"+t.lib);
-        LN.push("("+s.c+") "+_tileRole(s.c)+" | "+p.join(" | "));
+        LN.push("("+dispC(s.c)+") "+_tileRole(s.c)+" | "+p.join(" | "));
       }
     }
   }
@@ -2253,13 +2260,13 @@ function genLight(){
       var guilds=[];
       for(var gg=0;gg<GUILDS.length;gg++){var gl=GUILDS[gg];if(tt[gl.k]>0)guilds.push(tt[gl.k]+"x "+gl.nm);}
       var inst=[];if(tt.iBS)inst.push((tt.iBS>1?tt.iBS+"×":"")+"BS");if(tt.iCN)inst.push((tt.iCN>1?tt.iCN+"×":"")+"CN");if(tt.iDS)inst.push((tt.iDS>1?tt.iDS+"×":"")+"DS");
-      if(_tp2==="j"){var shS="";if(tt.ships&&tt.ships.length){var _sa=[];for(var si=0;si<tt.ships.length;si++){_sa.push(tt.ships[si].type+"("+tt.ships[si].cubes+"c)");}shS=" | Flotte: "+_sa.join(",");}LN.push("("+cc+") "+_tileRole(cc)+" | Pop "+tt.pop+" | "+(guilds.length?guilds.join(", "):"\u2205")+" | "+(inst.length?inst.join(","):"\u2205")+" | "+(tt.pur?"Pur":"Corrompu")+shS);}
-      else if(_tp2==="s"){var _tl=TER_FULL[tt.ter]||tt.ter||"?";var _sp=[];if(tt.cv)_sp.push(tt.cv+"cv");_sp.push("Pop "+tt.pop);if(guilds.length)_sp.push(guilds.join(", "));if(inst.length)_sp.push(inst.join(","));if(tt.ter==="md"){_sp.push("Corrompu (permanent)");if(tt.mdH)_sp.push(tt.mdH);}else if(tt.ter==="faille")_sp.push("Corrompu");else _sp.push(tt.pur===false?"Corrompu":"Pur");if(tt.grd)_sp.push("Gardien");if(tt.glo)_sp.push("Glo:"+tt.glo);LN.push("("+cc+") "+_tileRole(cc)+" | "+_tl+" | "+_sp.join(" | "));}
+      if(_tp2==="j"){var shS="";if(tt.ships&&tt.ships.length){var _sa=[];for(var si=0;si<tt.ships.length;si++){_sa.push(tt.ships[si].type+"("+tt.ships[si].cubes+"c)");}shS=" | Flotte: "+_sa.join(",");}LN.push("("+dispC(cc)+") "+_tileRole(cc)+" | Pop "+tt.pop+" | "+(guilds.length?guilds.join(", "):"\u2205")+" | "+(inst.length?inst.join(","):"\u2205")+" | "+(tt.pur?"Pur":"Corrompu")+shS);}
+      else if(_tp2==="s"){var _tl=TER_FULL[tt.ter]||tt.ter||"?";var _sp=[];if(tt.cv)_sp.push(tt.cv+"cv");_sp.push("Pop "+tt.pop);if(guilds.length)_sp.push(guilds.join(", "));if(inst.length)_sp.push(inst.join(","));if(tt.ter==="md"){_sp.push("Corrompu (permanent)");if(tt.mdH)_sp.push(tt.mdH);}else if(tt.ter==="faille")_sp.push("Corrompu");else _sp.push(tt.pur===false?"Corrompu":"Pur");if(tt.grd)_sp.push("Gardien");if(tt.glo)_sp.push("Glo:"+tt.glo);LN.push("("+dispC(cc)+") "+_tileRole(cc)+" | "+_tl+" | "+_sp.join(" | "));}
       else{
         /* Skip boring Neant sectors: no guilds, no installations, no gardien, no gloire, no prime */
         var _interesting=guilds.length||inst.length||tt.grd||tt.glo||tt.prm||tt.pop>=3;
         if(!_interesting){_skipped++;continue;}
-        LN.push("("+cc+") "+_tileRole(cc)+" | "+tt.cv+"cv | Pop "+tt.pop+" | "+(guilds.length?guilds.join(", "):"\u2205")+" | "+(inst.length?inst.join(","):"\u2205")+(tt.grd?" | Gardien":"")+(tt.prm?" | Prime:"+tt.prm:"")+(tt.glo?" | Glo:"+tt.glo:"")+" | Corrompu");
+        LN.push("("+dispC(cc)+") "+_tileRole(cc)+" | "+tt.cv+"cv | Pop "+tt.pop+" | "+(guilds.length?guilds.join(", "):"\u2205")+" | "+(inst.length?inst.join(","):"\u2205")+(tt.grd?" | Gardien":"")+(tt.prm?" | Prime:"+tt.prm:"")+(tt.glo?" | Glo:"+tt.glo:"")+" | Corrompu");
       }
     }
     if(_skipped)LN.push("("+_skipped+" secteurs Neant vides omis — tous Corrompus)");
