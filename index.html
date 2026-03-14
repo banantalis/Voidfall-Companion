@@ -1477,7 +1477,7 @@ function tglMenu(){
    PICKER
    ================================================================= */
 function tglPick(id){var idx=sel.indexOf(id);if(idx===-1)sel.push(id);else sel.splice(idx,1);R();}
-function pickAll(){sel=SEC_IDS.slice();R();}
+function pickAll(){sel=sel.length===SEC_IDS.length?[]:SEC_IDS.slice();R();}
 function goPick(){screen="pick";sel=[];R();}
 function goInput(){if(sel.length===0){alert("Sélectionnez au moins une section !");return;}screen="input";R();}
 
