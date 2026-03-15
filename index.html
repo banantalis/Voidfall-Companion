@@ -766,11 +766,11 @@ function newState(nm,ho,sc,di){
     rN:0,rE:0,rM:0,rC:0,rS:0,
     lS:0,lG:0,lE:0,cS:false,cG:false,cE:false,
     cA:0,cI:14,cD:0,
-    pr:[{t:"",p:true,c:false},{t:"",p:true,c:false},{t:"",p:true,c:false},{t:"",p:true,c:false}],
+    pr:[{t:"",p:true,c:false,j:false},{t:"",p:true,c:false,j:false},{t:"",p:true,c:false,j:false},{t:"",p:true,c:false,j:false}],
     tB:"",tA:"",
     tiles:{},
     crM:0,crE:0,cat:0,crP:0,grd:0,crSlots:{m:["","","",""],e:["","","",""]},crDraw:"",
-    coms:[],glos:[],
+    comPiste:6,glos:[],
     rf:[{n:0},{n:0}],
     evt:"",crC:"",
     fc:{cq:true,po:true,dv:true,pd:true,pr:true,pg:true,rf:true,tt:true,iv:false},
@@ -1196,11 +1196,14 @@ function migrate(){
   /* Ensure string fields default to "" */
   var strKeys=["tB","tA","evt","crC","fcS","notes","origin","diff"];
   for(var sk=0;sk<strKeys.length;sk++){if(S[strKeys[sk]]===undefined)S[strKeys[sk]]="";}
-  /* Migrate old com/glo single values → coms/glos arrays */
-  if(!Array.isArray(S.coms)){var _oc=typeof S.com==="number"&&S.com>0?S.com:0;S.coms=[];for(var ci=0;ci<_oc;ci++)S.coms.push(0);delete S.com;delete S.comD;}
+  /* Migrate old coms array → comPiste counter */
+  if(Array.isArray(S.coms)){delete S.coms;if(S.comPiste===undefined)S.comPiste=6;}
+  if(S.comPiste===undefined)S.comPiste=6;
   if(!Array.isArray(S.glos)){var _og=typeof S.glo==="number"&&S.glo>0?S.glo:0;S.glos=[];for(var gi=0;gi<_og;gi++)S.glos.push(0);delete S.glo;delete S.gloD;}
   /* Ensure array/object fields */
-  if(!Array.isArray(S.pr))S.pr=[{t:"",p:true,c:false},{t:"",p:true,c:false},{t:"",p:true,c:false},{t:"",p:true,c:false}];
+  if(!Array.isArray(S.pr))S.pr=[{t:"",p:true,c:false,j:false},{t:"",p:true,c:false,j:false},{t:"",p:true,c:false,j:false},{t:"",p:true,c:false,j:false}];
+  /* Ensure pr[i].j field exists (played this cycle toggle) */
+  for(var pi=0;pi<S.pr.length;pi++){if(S.pr[pi].j===undefined)S.pr[pi].j=false;}
   /* Force all tile numeric fields to 0 if undefined/NaN + migrate typ/ships */
   if(S.tiles){for(var tk2 in S.tiles){var _t2=S.tiles[tk2];
     var tKeys=["pop","gN","gE","gM","gC","gS","cv","prm","glo","lib","iBS","iCN","iDS"];
@@ -1345,10 +1348,11 @@ function calcCor(){
   return n;
 }
 
-/* Commerces & Gloires array helpers */
-function addCom(){S.coms.push(0);saveState();R();}
-function rmCom(i){S.coms.splice(i,1);saveState();R();}
-function adjCom(i,d){S.coms[i]=Math.max(0,Math.min(20,(S.coms[i]||0)+d));saveState();R();}
+/* Commerce piste (galactic board) — rewards lookup by remaining tokens */
+var COM_RWD=["aucun","3 Influence","Activer cube","2 Cr ou 2 Sc","2 res au choix","Jeton Prime","1 Science"];
+/* Index = comPiste (0-6). Ex: comPiste=4 → next token reward = "2 res au choix" */
+
+/* Gloires array helpers */
 function addGlo(){S.glos.push(0);saveState();R();}
 function rmGlo(i){S.glos.splice(i,1);saveState();R();}
 function adjGlo(i,d){S.glos[i]=Math.max(0,Math.min(20,(S.glos[i]||0)+d));saveState();R();}
@@ -1858,6 +1862,7 @@ function rSec_prog(){
     o+='<div class="prg-tags">';
     o+='<span class="tgl'+(p.p?"":" on-r")+'" onclick="togPr('+i+',\'p\')" style="font-size:.65rem">'+(p.p?"Pur":"Corr")+'</span>';
     o+='<span class="tgl'+(p.c?" on-y":"")+'" onclick="togPr('+i+',\'c\')" style="font-size:.65rem">'+(p.c?L("coins","ic-sm")+" Com":"Com")+'</span>';
+    if(p.t){o+='<span class="tgl'+(p.j?" on-r":"")+'" onclick="togPr('+i+',\'j\')" style="font-size:.65rem">'+(p.j?"Jou\u00e9":"Dispo")+'</span>';}
     o+='</div></div>';
   }
   o+='</div>';
@@ -1957,15 +1962,11 @@ function rSec_foc(){
 
 function rSec_div(){
   var o='<div class="card"><div class="card-t">'+L("gem")+'Divers</div>';
-  /* Commerces — individual counters */
-  o+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span style="font-weight:700;font-size:.82rem">Commerces</span>';
-  o+='<button style="padding:3px 10px;border-radius:6px;border:1px solid var(--ac);background:transparent;color:var(--ac);font-size:.72rem;font-weight:700" onclick="addCom()">+ Ajouter</button></div>';
-  for(var ci=0;ci<S.coms.length;ci++){
-    o+='<div class="ctr" style="margin-bottom:4px"><div class="ctr-lb">Commerce #'+(ci+1)+'</div>';
-    o+='<div style="display:flex;align-items:center;gap:4px"><div class="ctr-ct"><button class="ctr-b" onclick="adjCom('+ci+',-1)">\u2212</button><span class="ctr-v">'+S.coms[ci]+'</span><button class="ctr-b" onclick="adjCom('+ci+',1)">+</button></div>';
-    o+='<button style="width:24px;height:24px;border-radius:6px;border:1px solid var(--err);background:transparent;color:var(--err);font-size:.6rem;display:flex;align-items:center;justify-content:center;margin-left:16px;opacity:.5" onclick="if(confirm(\'Supprimer Commerce #'+(ci+1)+' ?\'))rmCom('+ci+')">'+L("x","ic-sm")+'</button></div></div>';
-  }
-  if(S.coms.length){var _comT=0;for(var ct=0;ct<S.coms.length;ct++)_comT+=S.coms[ct];o+='<div style="font-size:.68rem;color:var(--tx2);margin-bottom:6px;text-align:right">Total : '+_comT+'</div>';}
+  /* Piste Commerce galactique */
+  o+='<div class="ctr" style="margin-bottom:8px"><div class="ctr-lb">'+L("coins","ic-sm")+' Jetons Commerce (plateau)</div>';
+  o+='<div class="ctr-ct"><button class="ctr-b" onclick="adj(\'comPiste\',-1,0,6)">\u2212</button><span class="ctr-v">'+S.comPiste+'</span><button class="ctr-b" onclick="adj(\'comPiste\',1,0,6)">+</button></div></div>';
+  if(S.comPiste>0){o+='<div style="font-size:.68rem;color:var(--tx2);margin-bottom:8px">Prochain jeton \u2192 '+COM_RWD[S.comPiste]+' (ou inf\u00e9rieur)</div>';}
+  else{o+='<div style="font-size:.68rem;color:var(--err);margin-bottom:8px">Aucun jeton Commerce disponible</div>';}
 
   /* Gloires — individual counters */
   o+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;margin-top:10px"><span style="font-weight:700;font-size:.82rem">Gloires</span>';
@@ -2103,7 +2104,7 @@ function genSave(){
   }
   if(has("prog")){
     var _pr=[];
-    for(var i=0;i<4;i++){var p=S.pr[i];_pr.push((i+1)+"="+(p.t?(p.t+(p.p?"":" CORR")+(p.c?" com":"")):"vide"));}
+    for(var i=0;i<4;i++){var p=S.pr[i];_pr.push((i+1)+"="+(p.t?(p.t+(p.p?"":" CORR")+(p.c?" com":"")+(p.j?" JOUE":"")):"vide"));}
     LN.push("Prog: "+_pr.join(" | "));
     LN.push("Tech: "+(S.tB||"-")+(S.tA?" | Amel: "+S.tA:""));
   }
@@ -2168,7 +2169,7 @@ function genSave(){
 
   if(has("div")){
     var _bits=[];
-    var _comT=S.coms.reduce(function(a,b){return a+b;},0);if(_comT)_bits.push("com:"+_comT);
+    _bits.push("comPiste:"+S.comPiste+"/6"+(S.comPiste>0?" (prochain="+COM_RWD[S.comPiste]+")":""));
     var _gloT=S.glos.reduce(function(a,b){return a+b;},0);if(_gloT)_bits.push("glo:"+_gloT);
     _bits.push("refuges:"+S.rf[0].n+"/2,"+S.rf[1].n+"/2");
     if(S.evt)_bits.push("evt:"+S.evt);
@@ -2238,7 +2239,7 @@ function genLight(){
     LN.push("--- PROGRAMMES ---");
     for(var i=0;i<4;i++){
       var p=S.pr[i];
-      LN.push("  Slot "+(i+1)+": "+(p.t?(p.t+" | "+(p.p?"Pur":"Corrompu")+" | Commerce: "+(p.c?"oui":"non")):"vide"));
+      LN.push("  Slot "+(i+1)+": "+(p.t?(p.t+" | "+(p.p?"Pur":"Corrompu")+" | Commerce: "+(p.c?"oui":"non")+" | "+(p.j?"JOUE ce cycle":"Disponible")):"vide"));
     }
     LN.push("  Tech Base: "+(S.tB||"aucune")+" | Ameliorees: "+(S.tA||"aucune"));
   }
@@ -2278,9 +2279,8 @@ function genLight(){
   if(has("div")){
     LN.push("");
     LN.push("--- DIVERS ---");
-    var _comS2=S.coms.length?S.coms.join("+")+("="+S.coms.reduce(function(a,b){return a+b;},0)):"0";
     var _gloS2=S.glos.length?S.glos.join("+")+("="+S.glos.reduce(function(a,b){return a+b;},0)):"0";
-    LN.push("Commerces: "+_comS2+" | Gloires: "+_gloS2+" | Refuges: "+S.rf[0].n+"/2, "+S.rf[1].n+"/2");
+    LN.push("Jetons Commerce plateau: "+S.comPiste+"/6"+(S.comPiste>0?" (prochain="+COM_RWD[S.comPiste]+")":"")+" | Gloires: "+_gloS2+" | Refuges: "+S.rf[0].n+"/2, "+S.rf[1].n+"/2");
     if(S.evt)LN.push("Evenement: "+S.evt);
     if(S.crC)LN.push("Crise en cours: "+S.crC);
     if(S.oP&&S.oP.length)LN.push("Emplacements Programme: "+S.oP.join(", "));
