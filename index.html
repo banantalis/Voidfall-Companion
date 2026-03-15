@@ -2370,7 +2370,7 @@ function openAgentPaste(){
     '<span style="flex:1;font-family:var(--fth);font-weight:700;color:var(--ok);font-size:.9rem;letter-spacing:.03em">'+L("download","ic")+' Importer depuis l\'Agent</span>'+
     '<button class="sdp-x" onclick="closeDrop()">\u2715</button></div>'+
     '<div style="padding:14px;flex:1;overflow-y:auto">'+
-    '<div style="font-size:.72rem;color:var(--tx2);margin-bottom:8px;line-height:1.5">Collez la r\u00e9ponse compl\u00e8te de l\u2019Agent. S\u2019il a inclus un bloc <code style="color:var(--ok);background:var(--bg3);padding:2px 5px;border-radius:4px">%%VOIDFALL%%...%%END%%</code> \u00e0 la fin, l\u2019app va extraire et appliquer les changements automatiquement.</div>'+
+    '<div style="font-size:.72rem;color:var(--tx2);margin-bottom:8px;line-height:1.5">Collez la r\u00e9ponse compl\u00e8te de l\u2019Agent (bloc transfert ou sauvegarde). L\u2019app va extraire les donn\u00e9es automatiquement : ressources, pistes, cubes, programmes, focus, etc.</div>'+
     '<textarea id="_agPaste" rows="6" style="width:100%;min-height:100px" placeholder="Collez ici la r\u00e9ponse de l\u2019Agent pour importer..."></textarea>'+
     '<div id="_agResult" style="display:none;margin-top:8px"></div>'+
     '<button style="width:100%;padding:14px;border-radius:10px;border:none;background:var(--ok);color:#000;font-size:.95rem;font-weight:700;font-family:var(--fth);margin-top:10px" onclick="doAgentApply()">'+L("check","ic-sm")+' Appliquer</button>'+
@@ -2386,38 +2386,155 @@ function doAgentApply(){
   var txt=ta.value;
   if(!txt){_agMsg(res,"err","Rien \u00e0 importer");return;}
 
-  /* Extract JSON between markers */
+  /* Try JSON markers first */
   var m=txt.match(/%%VOIDFALL%%([\s\S]*?)%%END%%/);
-  if(!m){_agMsg(res,"err","Bloc %%VOIDFALL%% non trouv\u00e9 dans le texte. L\u2019Agent doit inclure un bloc %%VOIDFALL%%{...}%%END%% dans sa r\u00e9ponse.");return;}
+  var upd=null;
+  if(m){
+    var raw=m[1].trim().replace(/^```[a-z]*\n?/,"").replace(/\n?```$/,"").trim();
+    try{upd=JSON.parse(raw);}catch(e){_agMsg(res,"err","JSON invalide: "+e.message);return;}
+  }else{
+    /* Parse agent text (transfer/save/update blocks) */
+    upd=_parseAgentText(txt);
+    if(!upd||_countKeys(upd)===0){_agMsg(res,"err","Aucune donn\u00e9e reconnue dans le texte. V\u00e9rifie que tu as coll\u00e9 la r\u00e9ponse compl\u00e8te de l\u2019Agent.");return;}
+  }
 
-  var raw=m[1].trim();
-  /* Strip markdown code fences if present */
-  raw=raw.replace(/^```[a-z]*\n?/,"").replace(/\n?```$/,"").trim();
-
-  try{var upd=JSON.parse(raw);}
-  catch(e){_agMsg(res,"err","JSON invalide: "+e.message);return;}
-
-  /* Extract special _notes (replaces existing notes — checkpoint, not log) */
-  var agentNotes=upd._notes||null;
-  delete upd._notes;
-
-  /* Count changes */
+  var agentNotes=upd._notes||null;delete upd._notes;
   var cnt=_countKeys(upd)+(agentNotes?1:0);
-
-  /* Apply deep merge for state fields */
   _applyDeep(S,upd);
-
-  /* Append agent notes to journal */
   if(agentNotes)appendAgentNotes(agentNotes);
+  saveState();closeDrop();R();
 
-  saveState();
-
-  closeDrop();
-  R();
-
-  /* Flash feedback */
   var btn=document.getElementById("btnExpLight");
   if(btn){btn.innerHTML=L("check","ic-sm")+" "+cnt+" champ"+(cnt>1?"s":"")+" mis \u00e0 jour";btn.style.borderColor="var(--ok)";btn.style.color="var(--ok)";initIcons();setTimeout(function(){btn.innerHTML=L("upload","ic-sm")+" EXPORTER";btn.style.borderColor="var(--ac)";btn.style.color="var(--ac)";initIcons();},2500);}
+}
+
+/* ---- Parse agent text into state update object ---- */
+function _parseAgentText(txt){
+  var u={};
+  var _n=function(s){var v=parseInt(s,10);return isNaN(v)?null:v;};
+  var _f=function(s){var v=parseFloat(s);return isNaN(v)?null:v;};
+
+  /* --- Resources --- */
+  var rM=txt.match(/Nourriture\s*[:=]\s*(\d+)/i);if(rM)u.rN=_n(rM[1]);
+  rM=txt.match(/[EÉé]nergie\s*[:=]\s*(\d+)/i);if(rM)u.rE=_n(rM[1]);
+  rM=txt.match(/Mat[eéè]riel\s*[:=]\s*(\d+)/i);if(rM)u.rM=_n(rM[1]);
+  rM=txt.match(/Science\s*[:=]\s*(\d+)/i);if(rM)u.rS=_n(rM[1]);
+  rM=txt.match(/Cr[eéè]dits?\s*[:=]\s*(\d+)/i);if(rM)u.rC=_n(rM[1]);
+
+  /* Disambiguate: if RESERVES section found, use those values; otherwise first match is fine */
+  var resBlock=txt.match(/---\s*R[EÉ]SERVES?\s*---[\s\S]*?(?=---|===|$)/i);
+  if(resBlock){
+    var rb=resBlock[0];
+    var rr;
+    rr=rb.match(/Nourriture[^:]*[:=]\s*(\d+)/i);if(rr)u.rN=_n(rr[1]);
+    rr=rb.match(/[EÉé]nergie[^:]*[:=]\s*(\d+)/i);if(rr)u.rE=_n(rr[1]);
+    rr=rb.match(/Mat[eéè]riel[^:]*[:=]\s*(\d+)/i);if(rr)u.rM=_n(rr[1]);
+    rr=rb.match(/Science[^:]*[:=]\s*(\d+)/i);if(rr)u.rS=_n(rr[1]);
+    rr=rb.match(/Cr[eéè]dits?[^:]*[:=]\s*(\d+)/i);if(rr)u.rC=_n(rr[1]);
+  }
+
+  /* Influence */
+  rM=txt.match(/Influence\s*(?:totale)?\s*[:=~]\s*~?(\d+)/i);if(rM)u.inf=_n(rM[1]);
+
+  /* --- Civilization tracks --- */
+  rM=txt.match(/Soci[eéè]t[eéè]\s*[:=]\s*case\s*(\d+)/i);if(rM)u.lS=_n(rM[1]);
+  rM=txt.match(/Gouvernement\s*[:=]\s*case\s*(\d+)/i);if(rM)u.lG=_n(rM[1]);
+  rM=txt.match(/[EÉé]conomie\s*[:=]\s*case\s*(\d+)/i);if(rM)u.lE=_n(rM[1]);
+  /* Corruption on tracks */
+  if(txt.match(/Soci[eéè]t[eéè].*Corr(?:ompu|uption)\s*[:=]?\s*oui/i))u.cS=true;
+  else if(txt.match(/Soci[eéè]t[eéè].*Corr(?:ompu|uption)\s*[:=]?\s*non/i))u.cS=false;
+  if(txt.match(/Gouvernement.*Corr(?:ompu|uption)\s*[:=]?\s*oui/i))u.cG=true;
+  else if(txt.match(/Gouvernement.*Corr(?:ompu|uption)\s*[:=]?\s*non/i))u.cG=false;
+  if(txt.match(/[EÉé]conomie.*Corr(?:ompu|uption)\s*[:=]?\s*oui/i))u.cE=true;
+  else if(txt.match(/[EÉé]conomie.*Corr(?:ompu|uption)\s*[:=]?\s*non/i))u.cE=false;
+
+  /* --- Cubes --- */
+  rM=txt.match(/Actifs?\s*[:=]\s*(\d+)/i);if(rM)u.cA=_n(rM[1]);
+  rM=txt.match(/Inactifs?\s*[:=]\s*(\d+)/i);if(rM)u.cI=_n(rM[1]);
+  rM=txt.match(/D[eéè]ploy[eéè]s?\s*[:=]\s*(\d+)/i);if(rM)u.cD=_n(rM[1]);
+
+  /* --- Cycle/Manche/Phase --- */
+  rM=txt.match(/Cycle\s*[:=]\s*(\d)/i);if(rM)u.cy=_n(rM[1]);
+  rM=txt.match(/Manche\s*[:=]\s*(\d+)\s*(?:sur|\/)\s*(\d+)/i);if(rM){u.mn=_n(rM[1]);u.mnMax=_n(rM[2]);}
+  rM=txt.match(/Phase\s*[:=]\s*(Pr[eéè]p|Focus|Eval)/i);
+  if(rM){var ph=rM[1].toLowerCase();if(ph.indexOf("prep")===0)u.ph="prep";else if(ph.indexOf("focus")===0)u.ph="focus";else if(ph.indexOf("eval")===0)u.ph="eval";}
+
+  /* --- Commerce piste --- */
+  rM=txt.match(/Commerce[s]?\s*(?:sur\s*)?(?:plateau\s*)?(?:galactique)?\s*[:=]\s*(\d)/i);if(rM)u.comPiste=_n(rM[1]);
+  rM=txt.match(/comPiste\s*[:=]\s*(\d)/i);if(rM)u.comPiste=_n(rM[1]);
+
+  /* --- Catastrophes --- */
+  rM=txt.match(/Catastrophes?\s*[:=]\s*(\d)/i);if(rM)u.cat=_n(rM[1]);
+
+  /* --- Gloires --- */
+  rM=txt.match(/Gloires?\s*[:=]\s*[^|]*?valeurs?\s*[:=]?\s*([\d,\s+et]+)/i);
+  if(!rM)rM=txt.match(/Gloire[s]?\s*[:=]\s*(\d[\d\s,+et]*)/i);
+  if(rM){
+    var gStr=rM[1].replace(/et/g,",").replace(/\+/g,",");
+    var gArr=gStr.split(/[,\s]+/).map(function(v){return parseInt(v,10);}).filter(function(v){return !isNaN(v)&&v>0;});
+    if(gArr.length)u.glos=gArr;
+  }
+
+  /* --- Focus en main --- */
+  var focBlock=txt.match(/(?:En\s*main|Focus\s*(?:en\s*)?main)\s*[:=]\s*([^\n]+)/i);
+  if(focBlock){
+    var focStr=focBlock[1];
+    var fcMap={
+      "conqu":  "cq","polit":"po","d\u00e9vel":"dv","devel":"dv",
+      "produc":"pd","prosp":"pr","progr":"pg","progres":"pg","prog\u00e8s":"pg",
+      "renfo":"rf","tenta":"tt","innov":"iv"
+    };
+    /* Reset all to false first, then set found ones to true */
+    var newFc={cq:false,po:false,dv:false,pd:false,pr:false,pg:false,rf:false,tt:false,iv:false};
+    var focItems=focStr.split(/[,|]+/);
+    for(var fi=0;fi<focItems.length;fi++){
+      var fw=focItems[fi].trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+      for(var fk in fcMap){if(fw.indexOf(fk)!==-1){newFc[fcMap[fk]]=true;break;}}
+    }
+    /* Only apply if we found at least 1 Focus */
+    var fcFound=0;for(var fk2 in newFc){if(newFc[fk2])fcFound++;}
+    if(fcFound>0)u.fc=newFc;
+  }
+
+  /* --- Programmes (slots) --- */
+  var prLines=txt.match(/(?:Slot|Emplacement)\s*(\d)\s*[:=]\s*([^\n]+)/gi);
+  if(prLines&&prLines.length){
+    /* Build pr array from current state as base */
+    var prArr=[];for(var pi=0;pi<4;pi++){prArr.push({t:S.pr[pi].t,p:S.pr[pi].p,c:S.pr[pi].c,j:S.pr[pi].j});}
+    for(var pli=0;pli<prLines.length;pli++){
+      var plm=prLines[pli].match(/(?:Slot|Emplacement)\s*(\d)\s*[:=]\s*(.+)/i);
+      if(!plm)continue;
+      var idx=_n(plm[1])-1;if(idx<0||idx>3)continue;
+      var pTxt=plm[2];
+      if(pTxt.match(/vide/i)){prArr[idx]={t:"",p:true,c:false,j:false};continue;}
+      /* Extract name (first segment before |) */
+      var pParts=pTxt.split(/\s*\|\s*/);
+      var pName=pParts[0].replace(/\s*\(.*?\)\s*/g,"").trim();
+      if(pName)prArr[idx].t=pName;
+      /* Pur/Corrompu */
+      if(pTxt.match(/Corrompu/i))prArr[idx].p=false;
+      else if(pTxt.match(/Pur/i))prArr[idx].p=true;
+      /* Commerce */
+      if(pTxt.match(/Commerce\s*[:=]\s*oui/i))prArr[idx].c=true;
+      else if(pTxt.match(/Commerce\s*[:=]\s*non/i))prArr[idx].c=false;
+      /* Joue */
+      if(pTxt.match(/JOU[EÉé]/i))prArr[idx].j=true;
+      else if(pTxt.match(/Disponible/i))prArr[idx].j=false;
+    }
+    u.pr=prArr;
+  }
+
+  /* --- Technologies --- */
+  rM=txt.match(/Tech(?:nologies?)?\s*(?:de\s*)?Base\s*[:=]\s*([^\n|]+)/i);
+  if(rM){var tb=rM[1].trim();if(tb&&!tb.match(/^(aucune|none|\-|INCONNU)/i))u.tB=tb;}
+  rM=txt.match(/Am[eéè]lior[eéè]es?\s*[:=]\s*([^\n|]+)/i);
+  if(rM){var ta2=rM[1].trim();if(ta2.match(/^(aucune|none|\-)/i))u.tA="";else if(!ta2.match(/INCONNU/i))u.tA=ta2;}
+
+  /* --- Situation notes (everything under SITUATION header) --- */
+  var sitBlock=txt.match(/---\s*SITUATION\s*---\s*\n([\s\S]*?)(?=\n===|$)/i);
+  if(sitBlock&&sitBlock[1].trim())u._notes=sitBlock[1].trim();
+
+  return u;
 }
 
 function _agMsg(el,type,msg){
